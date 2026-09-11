@@ -306,8 +306,8 @@
   var STORE_KEY = "wny-planning.calculator.v1";
   var TERM_YEARS = 30;
 
-  /* the dataset has lived at more than one path; the enriched copy wins */
-  var SOURCES = ["../data/properties.json", "../properties.json"];
+  /* properties.json at the repo root is the generated dataset and the only copy */
+  var SOURCES = ["../properties.json"];
 
   var FIELDS = [
     "price", "downPct", "rate", "taxRate", "insuranceYr", "miMonthly",
@@ -642,9 +642,8 @@
     showInfo(restored);
   }
 
-  /* Walk the candidate paths: prefer the enriched copy, but keep the first
-     readable one as a fallback so a missing enriched file still leaves a
-     working picker. */
+  /* Read the dataset, but keep a readable-yet-unenriched copy as a fallback so
+     a file missing the scored fields still leaves a working picker. */
   function tryLoad(i, savedId, fallback) {
     if (i >= SOURCES.length) {
       if (fallback) { useData(fallback, savedId); return; }

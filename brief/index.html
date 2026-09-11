@@ -460,9 +460,8 @@
         }
     };
 
-  /* The enriched dataset has lived at more than one path; take whichever copy
-     actually carries the scored fields. */
-  var SOURCES = ["../data/properties.json", "../properties.json"];
+  /* properties.json at the repo root is the generated dataset and the only copy. */
+  var SOURCES = ["../properties.json"];
 
   var REVENUE = [
     ["strDwelling", "STR"], ["huntingLease", "Hunt"], ["timber", "Timber"],
@@ -852,7 +851,7 @@
     if (i >= SOURCES.length) {
       fail(sawAny
         ? "Found a properties file, but it does not carry the scored fields this page needs "
-          + "(rank, overallScore, revenue). Publish the enriched dataset to data/properties.json."
+          + "(rank, overallScore, revenue). Publish the enriched dataset to properties.json."
         : "Could not load properties.json. Reload, or check that the file is published.");
       return;
     }
