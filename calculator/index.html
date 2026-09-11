@@ -104,6 +104,21 @@
     background: var(--accent-soft); color: var(--muted); margin-bottom: 12px;
   }
   .msg[hidden] { display: none; }
+  .info {
+    margin-top: 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--bg); padding: 10px 12px;
+  }
+  .info[hidden] { display: none; }
+  .info .irow {
+    display: flex; justify-content: space-between; gap: 12px;
+    font-size: 13px; padding: 4px 0;
+  }
+  .info .irow + .irow { border-top: 1px solid var(--line); }
+  .info .ik { color: var(--muted); }
+  .info .iv { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+  .info .iv.fin { font-weight: 400; font-size: 12.5px; }
+  .info .iv.owner { color: var(--accent); font-weight: 700; }
+  .info .ifoot { font-size: 12px; color: var(--muted); margin-top: 7px; }
   .reset {
     font: inherit; font-size: 14px; padding: 9px 14px; cursor: pointer;
     background: var(--panel); color: var(--muted);
@@ -132,6 +147,7 @@
         <option value="">— Enter a price manually —</option>
       </select>
       <span class="hint" id="propertyMeta">Picking a listing fills the purchase price; you can still edit it.</span>
+      <div class="info" id="propertyInfo" hidden></div>
     </div>
   </div>
 </section>
@@ -289,6 +305,9 @@
 
   var STORE_KEY = "wny-planning.calculator.v1";
   var TERM_YEARS = 30;
+
+  /* the dataset has lived at more than one path; the enriched copy wins */
+  var SOURCES = ["../data/properties.json", "../properties.json"];
 
   var FIELDS = [
     "price", "downPct", "rate", "taxRate", "insuranceYr", "miMonthly",
@@ -479,6 +498,66 @@
     return parts.join(" · ");
   }
 
+  function infoRow(parent, key, value, cls) {
+    if (value === null || value === undefined || value === "") { return; }
+    var row = document.createElement("div");
+    row.className = "irow";
+    var k = document.createElement("span");
+    k.className = "ik";
+    k.textContent = key;
+    var v = document.createElement("span");
+    v.className = "iv" + (cls ? " " + cls : "");
+    v.textContent = value;
+    row.appendChild(k);
+    row.appendChild(v);
+    parent.appendChild(row);
+  }
+
+  /* Listing detail for the picked property. Nothing here is a household figure,
+     so none of it is stored - it is re-read from the dataset on each pick. */
+  function showInfo(p) {
+    var box = $("propertyInfo");
+    box.textContent = "";
+    if (!p) { box.hidden = true; return; }
+
+    var any = false;
+    if (p.acreage) {
+      infoRow(box, "Acreage", p.acreage + " acres"
+        + (p.pricePerAcre ? " (" + money.format(p.pricePerAcre) + "/acre)" : ""));
+      any = true;
+    }
+    if (p.taxesPerYear) {
+      infoRow(box, "Listed taxes", money.format(p.taxesPerYear) + " / yr");
+      any = true;
+    }
+    if (p.estCashToEnter) {
+      infoRow(box, "Est. cash to enter", money.format(p.estCashToEnter));
+      any = true;
+    }
+    if (p.financingPath) {
+      infoRow(box, "Financing path", p.financingPath,
+        /owner|seller/i.test(p.financingPath) ? "fin owner" : "fin");
+      any = true;
+    }
+
+    if (any && p.taxesPerYear && p.price) {
+      var foot = document.createElement("div");
+      foot.className = "ifoot";
+      foot.textContent = "Tax rate below was set to "
+        + (Math.round(p.taxesPerYear / p.price * 10000) / 100) + "% to match the listed taxes.";
+      box.appendChild(foot);
+    }
+    box.hidden = !any;
+  }
+
+  /* Listed taxes are dollars; the calculator works in a rate, so convert. */
+  function applyListingDefaults(p) {
+    $("price").value = p.price;
+    if (p.taxesPerYear && p.price) {
+      $("taxRate").value = Math.round(p.taxesPerYear / p.price * 10000) / 100;
+    }
+  }
+
   function buildOptions(list) {
     var select = $("propertySelect");
     var groups = [
@@ -515,12 +594,13 @@
     var id = this.value;
     var p = properties.filter(function (x) { return x.id === id; })[0];
     if (p) {
-      $("price").value = p.price;
+      applyListingDefaults(p);
       $("propertyMeta").textContent = withDate(describe(p));
     } else {
       $("propertyMeta").textContent =
         withDate("Picking a listing fills the purchase price; you can still edit it.");
     }
+    showInfo(p || null);
     update();
   });
 
@@ -537,31 +617,55 @@
         + "Everything else works: just type a purchase price.");
       return;
     }
-    fetch("../data/properties.json", { cache: "no-cache" })
+    tryLoad(0, savedId);
+  }
+
+  function useData(data, savedId) {
+    properties = (data && data.properties) || [];
+    dataDate = (data && data.lastUpdated) || "";
+    buildOptions(properties);
+
+    var restored = null;
+    if (savedId) {
+      var select = $("propertySelect");
+      select.value = savedId;
+      if (select.value === savedId) {
+        restored = properties.filter(function (x) { return x.id === savedId; })[0] || null;
+      }
+    }
+    $("propertyMeta").textContent = restored
+      ? withDate(describe(restored))
+      : withDate("Picking a listing fills the purchase price; you can still edit it.");
+
+    /* Show the listing detail again, but never re-apply its price or tax rate:
+       whatever the user last typed is what was saved, and it wins. */
+    showInfo(restored);
+  }
+
+  /* Walk the candidate paths: prefer the enriched copy, but keep the first
+     readable one as a fallback so a missing enriched file still leaves a
+     working picker. */
+  function tryLoad(i, savedId, fallback) {
+    if (i >= SOURCES.length) {
+      if (fallback) { useData(fallback, savedId); return; }
+      message("Couldn't load the listings file. "
+        + "The calculator still works - type a purchase price below.");
+      return;
+    }
+    fetch(SOURCES[i], { cache: "no-cache" })
       .then(function (res) {
         if (!res.ok) { throw new Error("HTTP " + res.status); }
         return res.json();
       })
       .then(function (data) {
-        properties = (data && data.properties) || [];
-        dataDate = (data && data.lastUpdated) || "";
-        buildOptions(properties);
-        var restored = null;
-        if (savedId) {
-          var select = $("propertySelect");
-          select.value = savedId;
-          if (select.value === savedId) {
-            restored = properties.filter(function (x) { return x.id === savedId; })[0] || null;
-          }
-        }
-        $("propertyMeta").textContent = restored
-          ? withDate(describe(restored))
-          : withDate("Picking a listing fills the purchase price; you can still edit it.");
+        var ps = (data && data.properties) || [];
+        var enriched = ps.some(function (x) {
+          return x.group === "resort-site" && typeof x.rank === "number";
+        });
+        if (enriched) { useData(data, savedId); return; }
+        tryLoad(i + 1, savedId, fallback || data);
       })
-      .catch(function () {
-        message("Couldn't load the listings file (data/properties.json). "
-          + "The calculator still works — type a purchase price below.");
-      });
+      .catch(function () { tryLoad(i + 1, savedId, fallback); });
   }
 
   /* ---------- wiring ---------- */
