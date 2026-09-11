@@ -12,12 +12,19 @@
     --panel: #ffffff;
     --ink: #1d2321;
     --muted: #5f6b66;
+    --faint: #93a09a;
     --line: #dfe4e0;
     --accent: #2f6f4e;
     --accent-soft: #e8f1eb;
-    --warm: #9a6b1f;
-    --warm-soft: #f7efdf;
-    --radius: 10px;
+    --radius: 11px;
+
+    --c-green: #1f7a4d;   --c-green-bg: #e4f1e9;
+    --c-yellow: #8a6410;  --c-yellow-bg: #f9efd8;
+    --c-gray: #5f6b66;    --c-gray-bg: #ebeeec;
+    --c-brown: #7a4f29;   --c-brown-bg: #f2e7dc;
+    --c-blue: #1e5f8f;    --c-blue-bg: #e1edf6;
+    --c-purple: #6b3f8f;  --c-purple-bg: #eee5f6;
+    --c-red: #a83228;     --c-red-bg: #f8e3e0;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -25,138 +32,164 @@
       --panel: #1c2320;
       --ink: #e9eeeb;
       --muted: #9daaa3;
+      --faint: #6b7a73;
       --line: #2e3833;
       --accent: #6fbf8f;
       --accent-soft: #22302a;
-      --warm: #d8b06a;
-      --warm-soft: #322a1c;
+
+      --c-green: #7cc79b;   --c-green-bg: #1e3328;
+      --c-yellow: #d9b56d;  --c-yellow-bg: #332c1a;
+      --c-gray: #9daaa3;    --c-gray-bg: #272f2b;
+      --c-brown: #cf9d6f;   --c-brown-bg: #332619;
+      --c-blue: #7bb4dd;    --c-blue-bg: #1a2a36;
+      --c-purple: #b593d6;  --c-purple-bg: #281d33;
+      --c-red: #e59183;     --c-red-bg: #35201d;
     }
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
+    margin: 0; background: var(--bg); color: var(--ink);
     font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-text-size-adjust: 100%;
   }
-  .wrap { max-width: 860px; margin: 0 auto; padding: 18px 14px 56px; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 18px 14px 56px; }
   a { color: var(--accent); }
-  .home {
-    display: inline-block; color: var(--muted); text-decoration: none;
-    font-size: 14px; margin-bottom: 10px;
-  }
+  .home { display: inline-block; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 10px; }
   .home:hover { color: var(--accent); }
   h1 { font-size: 23px; margin: 0 0 6px; letter-spacing: -0.01em; }
   .sub { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
-  .asof {
-    display: inline-block; font-size: 12px; color: var(--muted);
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: 999px; padding: 3px 11px;
-  }
-  h2 {
-    font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
-    color: var(--muted); margin: 26px 0 10px; font-weight: 600;
-  }
-  .note {
-    font-size: 13px; color: var(--muted); background: var(--panel);
-    border: 1px solid var(--line); border-radius: 8px;
-    padding: 10px 12px; margin: 12px 0;
-  }
+  .asof { display: inline-block; font-size: 12px; color: var(--muted);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; }
+  .src { display: block; font-size: 12px; color: var(--faint); margin-top: 7px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); margin: 26px 0 10px; font-weight: 600; }
+  .note { font-size: 13px; color: var(--muted); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 12px 0; }
   .note b { color: var(--ink); font-weight: 600; }
 
-  #map {
-    height: 300px; border-radius: var(--radius);
-    border: 1px solid var(--line); background: var(--panel);
-    margin-bottom: 8px; z-index: 0;
-  }
+  #map { height: 300px; border-radius: var(--radius); border: 1px solid var(--line);
+    background: var(--panel); margin-bottom: 8px; z-index: 0; }
   @media (min-width: 620px) { #map { height: 400px; } }
-  .maperr {
-    display: flex; align-items: center; justify-content: center;
-    height: 100%; padding: 20px; text-align: center;
-    color: var(--muted); font-size: 14px;
-  }
+  .maperr { display: flex; align-items: center; justify-content: center; height: 100%;
+    padding: 20px; text-align: center; color: var(--muted); font-size: 14px; }
   .leaflet-container { font: inherit; border-radius: var(--radius); }
   .pop { font-size: 13px; line-height: 1.45; }
   .pop b { display: block; font-size: 14px; margin-bottom: 2px; }
-  .pop button {
-    margin-top: 6px; font: inherit; font-size: 13px; cursor: pointer;
-    background: var(--accent); color: #fff; border: 0;
-    border-radius: 6px; padding: 5px 10px;
-  }
+  .pop button { margin-top: 6px; font: inherit; font-size: 13px; cursor: pointer;
+    background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 5px 10px; }
 
-  .cards { display: grid; gap: 10px; }
-  .card {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 13px 14px;
-    scroll-margin-top: 14px;
-  }
+  /* ---- dossier card ---- */
+  .cards { display: grid; gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; scroll-margin-top: 14px; }
   .card.flash { animation: flash 1.6s ease-out; }
   @keyframes flash {
     0%, 45% { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
     100% { border-color: var(--line); box-shadow: none; }
   }
-  .card-top { display: flex; gap: 10px; align-items: baseline; }
-  .rank {
-    flex: none; font-size: 12px; font-weight: 700; color: var(--accent);
-    background: var(--accent-soft); border-radius: 6px;
-    padding: 2px 7px; font-variant-numeric: tabular-nums;
-  }
-  .addr { font-weight: 600; font-size: 16px; }
-  .where { color: var(--muted); font-size: 13px; margin-top: 1px; }
-  .price {
-    margin-left: auto; flex: none; font-weight: 700;
-    font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
-  .facts {
-    display: flex; flex-wrap: wrap; gap: 6px;
-    margin-top: 10px; font-size: 12.5px;
-  }
-  .fact {
-    background: var(--bg); border: 1px solid var(--line);
-    border-radius: 999px; padding: 3px 9px; color: var(--muted);
-  }
-  .fact b { color: var(--ink); font-weight: 600; }
-  .fact.badge { background: var(--warm-soft); border-color: transparent; color: var(--warm); font-weight: 600; }
-  .fact.tbd { color: var(--muted); font-style: italic; }
-  .card a.zl {
-    display: inline-block; margin-top: 11px; font-size: 13.5px;
-    font-weight: 600; text-decoration: none;
-  }
-  .card a.zl:hover { text-decoration: underline; }
+  /* the photo and its placeholder MUST share these box rules, so real photos
+     drop in later without reflowing the card */
+  .shot, .shot-ph { width: 100%; aspect-ratio: 16 / 9; max-height: 150px; }
+  .shot { display: block; object-fit: cover; background: var(--bg);
+    border-bottom: 1px solid var(--line); }
+  .shot-ph {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; border-bottom: 1px solid var(--line);
+    background: repeating-linear-gradient(135deg, var(--bg), var(--bg) 9px, transparent 9px, transparent 18px); }
+  .shot-ph .c { font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--faint); }
+  .shot-ph .t { font-size: 11px; color: var(--faint); }
+  .body { padding: 13px 14px 14px; }
 
-  details {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: var(--radius); margin-top: 12px; overflow: hidden;
-  }
-  details > summary {
-    cursor: pointer; padding: 13px 14px; font-weight: 600; font-size: 15px;
-    list-style: none;
-  }
+  .card-top { display: flex; gap: 9px; align-items: flex-start; }
+  .rank { flex: none; font-size: 12px; font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); border-radius: 6px; padding: 3px 7px;
+    font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .who { min-width: 0; flex: 1; }
+  .addr { font-weight: 600; font-size: 16.5px; line-height: 1.25; }
+  .where { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .pricebox { margin-left: auto; flex: none; text-align: right; }
+  .price { display: block; font-weight: 700; font-size: 17px;
+    font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .score { display: inline-block; margin-top: 4px; font-size: 11.5px; font-weight: 700;
+    border-radius: 999px; padding: 2px 8px; white-space: nowrap;
+    color: var(--c-gray); background: var(--c-gray-bg); }
+  .score.hi { color: var(--c-green); background: var(--c-green-bg); }
+  .score.mid { color: var(--c-blue); background: var(--c-blue-bg); }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 11px; }
+  .stat { font-size: 12.5px; color: var(--muted); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 7px; padding: 3px 8px; white-space: nowrap; }
+  .stat b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .chip { font-size: 11.5px; font-weight: 600; border-radius: 999px;
+    padding: 3px 9px; white-space: nowrap; }
+  .chip.green  { color: var(--c-green);  background: var(--c-green-bg); }
+  .chip.yellow { color: var(--c-yellow); background: var(--c-yellow-bg); }
+  .chip.gray   { color: var(--c-gray);   background: var(--c-gray-bg); }
+  .chip.brown  { color: var(--c-brown);  background: var(--c-brown-bg); }
+  .chip.blue   { color: var(--c-blue);   background: var(--c-blue-bg); }
+  .chip.purple { color: var(--c-purple); background: var(--c-purple-bg); }
+  .chip.red    { color: var(--c-red);    background: var(--c-red-bg); }
+  .chip[title] { cursor: help; border-bottom: 1px dotted currentColor; }
+
+  .money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 9px;
+    margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--line); }
+  .cash { font-size: 14.5px; font-weight: 600; white-space: nowrap; }
+  .cash span { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .fin { font-size: 12.5px; color: var(--muted); }
+  .fin.owner { color: var(--c-green); background: var(--c-green-bg); font-weight: 700;
+    border-radius: 999px; padding: 2px 9px; }
+
+  .revwrap { margin-top: 11px; }
+  .revlab { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--faint); margin-bottom: 4px; }
+  /* ten columns need ~40px each to spell the labels out; below that, wrap to
+     5x2 rather than truncate - the order (and so the pattern) is unchanged */
+  .rev { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
+  @media (min-width: 470px) { .rev { grid-template-columns: repeat(10, 1fr); } }
+  .rv { font-size: 10.5px; font-weight: 600; text-align: center; border-radius: 5px;
+    padding: 4px 1px; border: 1px solid transparent; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; cursor: help; }
+  .rv.yes { color: #fff; background: var(--c-green); border-color: var(--c-green); }
+  .rv.maybe { color: var(--c-green); background: transparent; border-color: var(--c-green);
+    opacity: 0.75; }
+  .rv.no { color: var(--faint); background: var(--bg); opacity: 0.4; font-weight: 400; }
+  @media (prefers-color-scheme: dark) { .rv.yes { color: #11201a; } }
+
+  .subs { margin-top: 9px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .subs b { color: var(--ink); font-weight: 600; }
+  .lines { margin-top: 9px; }
+  .lines p { margin: 0 0 3px; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  .lines p b { color: var(--ink); font-weight: 600; }
+  .zl { display: inline-block; margin-top: 12px; font-size: 13.5px; font-weight: 600;
+    text-decoration: none; background: var(--accent-soft); color: var(--accent);
+    border-radius: 8px; padding: 8px 13px; }
+  .zl:hover { text-decoration: underline; }
+
+  details { background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); margin-top: 14px; overflow: hidden; }
+  details > summary { cursor: pointer; padding: 13px 14px; font-weight: 600; font-size: 15px; list-style: none; }
   details > summary::-webkit-details-marker { display: none; }
   details > summary::before { content: "\25b8\00a0"; color: var(--accent); font-weight: 700; }
   details[open] > summary::before { content: "\25be\00a0"; }
   details > summary span { display: block; font-weight: 400; font-size: 13px; color: var(--muted); margin-top: 2px; }
-  .details-body { padding: 0 14px 14px; }
-  .details-body .cards { margin-top: 2px; }
+  .details-body { padding: 0 12px 13px; }
   .details-body .card { background: var(--bg); }
+  .details-body .shot-ph { background: repeating-linear-gradient(135deg, var(--panel), var(--panel) 9px, transparent 9px, transparent 18px); }
 
   ul.metro { list-style: none; margin: 0; padding: 0; }
-  ul.metro li {
-    display: flex; gap: 10px; align-items: baseline;
-    padding: 10px 0; border-bottom: 1px solid var(--line);
-    scroll-margin-top: 14px;
-  }
+  ul.metro li { display: flex; gap: 10px; align-items: baseline; padding: 10px 2px;
+    border-bottom: 1px solid var(--line); scroll-margin-top: 14px; }
   ul.metro li:last-child { border-bottom: 0; }
   ul.metro .m-main { min-width: 0; }
   ul.metro .m-addr { font-weight: 600; font-size: 15px; }
   ul.metro a { text-decoration: none; }
   ul.metro a:hover { text-decoration: underline; }
   ul.metro .m-meta { color: var(--muted); font-size: 13px; }
-  ul.metro .m-price {
-    margin-left: auto; flex: none; font-weight: 600;
-    font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
+  ul.metro .m-price { margin-left: auto; flex: none; font-weight: 600;
+    font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   .loading { color: var(--muted); font-size: 14px; padding: 20px 0; }
   footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 26px; }
@@ -168,8 +201,9 @@
 <header>
   <a class="home" href="../">&larr; WNY Planning</a>
   <h1>Acreage shortlist</h1>
-  <p class="sub">Land and small-acreage parcels in Western New York, within reach of Buffalo.</p>
+  <p class="sub">Ranked land and small-acreage parcels in Western New York, within reach of Buffalo.</p>
   <span class="asof">Data as of <span id="asOf">&hellip;</span></span>
+  <span class="src" id="srcLine"></span>
 </header>
 
 <div id="status" class="loading">Loading properties&hellip;</div>
@@ -178,12 +212,12 @@
 
   <div id="map"></div>
   <p class="note" id="mapNote">
-    <b>Pins are town-level.</b> Each parcel is placed at its town centre and nudged apart so
-    overlapping listings stay clickable &mdash; not at the exact lot. Tap a pin to jump to its card.
+    <b>Pins are town-level.</b> Each parcel sits at its town centre, nudged apart so overlapping
+    listings stay clickable &mdash; not at the exact lot. Tap a pin to jump to its card.
   </p>
 
   <h2 id="topHead">Top 15</h2>
-  <p class="note" id="rankNote"></p>
+  <p class="note" id="rankNote"><b>Ordered by the hand-curated rank</b> in the dataset, not recomputed here.</p>
   <div class="cards" id="topCards"></div>
 
   <details id="restBox">
@@ -198,7 +232,7 @@
 
 </main>
 
-<footer>Prices and details as listed; verify acreage, taxes and access before making an offer.</footer>
+<footer>Scores and notes are our own working judgements; verify acreage, taxes, zoning and access before making an offer.</footer>
 
 </div>
 
@@ -210,8 +244,9 @@
   var BUF = { lat: 42.9405, lng: -78.7322 };
   var TOP_N = 15;
 
-  /* Town centroids and approximate driving miles to Buffalo Niagara (BUF).
-     Covers every town present in data/properties.json. */
+  /* The dataset has no coordinates, so the map places each parcel at its town
+     centre. Driving figures on the cards come from the data itself (bufMiles /
+     bufMinutes); the miles here are only a fallback. */
   var TOWNS = {
         "Akron": {
             "buf": 17,
@@ -247,6 +282,11 @@
             "buf": 75,
             "lat": 42.2231,
             "lng": -78.0342
+        },
+        "Bemus Point": {
+            "buf": 72,
+            "lat": 42.162,
+            "lng": -79.3892
         },
         "Bemus Pt": {
             "buf": 72,
@@ -420,123 +460,246 @@
         }
     };
 
+  /* The enriched dataset has lived at more than one path; take whichever copy
+     actually carries the scored fields. */
+  var SOURCES = ["../data/properties.json", "../properties.json"];
+
+  var REVENUE = [
+    ["strDwelling", "STR"], ["huntingLease", "Hunt"], ["timber", "Timber"],
+    ["farmHayLease", "Hay"], ["solarLease", "Solar"], ["mapleSugarbush", "Maple"],
+    ["gasOilIncome", "Gas"], ["campingGlamping", "Camp"], ["eventsBarn", "Events"],
+    ["pondFishing", "Pond"]
+  ];
+  var REVENUE_LONG = {
+    strDwelling: "Short-term rental dwelling", huntingLease: "Hunting lease",
+    timber: "Timber", farmHayLease: "Farm / hay lease", solarLease: "Solar lease",
+    mapleSugarbush: "Maple sugarbush", gasOilIncome: "Gas / oil income",
+    campingGlamping: "Camping / glamping", eventsBarn: "Events barn",
+    pondFishing: "Pond fishing"
+  };
+
+  var LAND_COLOR = [
+    ["habitable year round", "green"], ["habitable seasonal", "yellow"],
+    ["unimproved", "gray"], ["structures not habitable", "brown"],
+    ["operating business", "blue"]
+  ];
+  var ZONING_COLOR = [
+    ["unzoned spr", "green"], ["unzoned", "green"],
+    ["likely unzoned", "yellow"], ["zoned light", "yellow"],
+    ["sup friendly", "blue"], ["zoned precedent", "blue"],
+    ["resort grade", "purple"],
+    ["zoned unverified", "gray"],
+    ["hostile", "red"]
+  ];
+
   var $ = function (id) { return document.getElementById(id); };
-  var money = new Intl.NumberFormat("en-US", {
-    style: "currency", currency: "USD", maximumFractionDigits: 0
-  });
+  var money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) { n.className = cls; }
-    if (text !== undefined) { n.textContent = text; }
+    if (text !== undefined && text !== null) { n.textContent = text; }
     return n;
   }
 
-  function zillowUrl(p) {
+  /* "Habitable - year-round" and "Zoned - light" differ only in punctuation
+     between sources, so match on letters and digits alone. */
+  function slug(v) {
+    return String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  }
+
+  function colorFor(table, value) {
+    var s = slug(value), i;
+    for (i = 0; i < table.length; i++) {
+      if (s === table[i][0]) { return table[i][1]; }
+    }
+    for (i = 0; i < table.length; i++) {
+      if (s.indexOf(table[i][0]) !== -1) { return table[i][1]; }
+    }
+    return "gray";
+  }
+
+  function compactCash(v) {
+    if (v === null || v === undefined) { return null; }
+    if (v >= 1000) { return "$" + Math.round(v / 1000) + "K"; }
+    return money.format(v);
+  }
+
+  function score(v) {
+    if (v === null || v === undefined) { return null; }
+    return String(Math.round(v * 100) / 100);
+  }
+
+  function zurl(p) {
+    if (p.zillowLink) { return p.zillowLink; }
     if (p.zillowPath) { return "https://www.zillow.com" + p.zillowPath; }
     return "https://www.zillow.com/homedetails/" + p.id + "_zpid/";
   }
 
-  function town(p) { return TOWNS[p.town] || null; }
-
-  function bufMiles(p) {
-    var t = town(p);
-    return t ? t.buf : null;
+  function isEnriched(data) {
+    var ps = (data && data.properties) || [];
+    var i;
+    for (i = 0; i < ps.length; i++) {
+      if (ps[i].group === "resort-site") {
+        return typeof ps[i].rank === "number" && typeof ps[i].overallScore === "number";
+      }
+    }
+    return false;
   }
 
-  function perAcre(p) {
-    if (p.acreage && p.acreage > 0) { return p.price / p.acreage; }
-    return null;
+  /* ---------- card ---------- */
+
+  function photo(p) {
+    if (p.photo) {
+      var img = el("img", "shot");
+      img.src = p.photo;
+      img.alt = p.address + ", " + p.town;
+      img.loading = "lazy";
+      return img;
+    }
+    var ph = el("div", "shot-ph");
+    ph.appendChild(el("div", "c", p.county + " County"));
+    ph.appendChild(el("div", "t", "photo to come"));
+    return ph;
   }
 
-  /* ---------- ranking ----------
-     Primary: lowest price per acre when acreage is known. Parcels with no acreage
-     yet fall back to lowest price, and rank after the priced-per-acre ones (the two
-     figures are not comparable). Ties break on the shortest drive to BUF. */
-
-  function rankResort(list) {
-    return list.slice().sort(function (a, b) {
-      var pa = perAcre(a), pb = perAcre(b);
-      if (pa !== null && pb === null) { return -1; }
-      if (pa === null && pb !== null) { return 1; }
-      var ka = pa !== null ? pa : a.price;
-      var kb = pb !== null ? pb : b.price;
-      if (ka !== kb) { return ka - kb; }
-      var da = bufMiles(a), db = bufMiles(b);
-      if (da === null) { da = 9999; }
-      if (db === null) { db = 9999; }
-      if (da !== db) { return da - db; }
-      return a.price - b.price;
-    });
+  function statTag(parent, label, value) {
+    if (value === null || value === undefined || value === "") { return; }
+    var s = el("span", "stat");
+    s.appendChild(el("b", null, value));
+    if (label) { s.appendChild(document.createTextNode(" " + label)); }
+    parent.appendChild(s);
   }
 
-  function rankNote(ranked) {
-    var withAcres = ranked.filter(function (p) { return perAcre(p) !== null; }).length;
-    var note = $("rankNote");
-    note.textContent = "";
-    var b = el("b", null, withAcres === 0
-      ? "Ranked by price, closest drive to Buffalo breaking ties."
-      : "Ranked by price per acre where acreage is known, then by price.");
-    note.appendChild(b);
-    note.appendChild(document.createTextNode(withAcres === 0
-      ? " No acreage figures are in the data yet, so every parcel is ranked on price alone -"
-        + " once acreage lands, parcels with a known $/acre will rank first."
-      : " " + withAcres + " of " + ranked.length + " parcels have acreage; the rest are ranked on price"
-        + " and listed after them."));
+  function chip(parent, text, cls, tip) {
+    if (!text) { return; }
+    var c = el("span", "chip " + cls, text);
+    if (tip) { c.title = tip; }
+    parent.appendChild(c);
   }
 
-  /* ---------- cards ---------- */
-
-  function card(p, rank) {
-    var c = el("div", "card");
+  function card(p) {
+    var c = el("article", "card");
     c.id = "p-" + p.id;
+    c.appendChild(photo(p));
 
+    var body = el("div", "body");
+
+    /* header */
     var top = el("div", "card-top");
-    var badge = el("span", "rank", "#" + rank);
-    var main = el("div");
-    main.appendChild(el("div", "addr", p.address));
-    main.appendChild(el("div", "where", p.town + ", " + p.county + " County " + p.zip));
-    var price = el("span", "price", money.format(p.price));
-    top.appendChild(badge);
-    top.appendChild(main);
-    top.appendChild(price);
-    c.appendChild(top);
+    top.appendChild(el("span", "rank", "#" + p.rank));
+    var who = el("div", "who");
+    who.appendChild(el("div", "addr", p.address));
+    who.appendChild(el("div", "where", p.town + ", " + p.county + " County " + p.zip));
+    top.appendChild(who);
+    var box = el("div", "pricebox");
+    box.appendChild(el("span", "price", money.format(p.price)));
+    var sc = score(p.overallScore);
+    if (sc !== null) {
+      var band = p.overallScore >= 7.5 ? " hi" : (p.overallScore >= 6 ? " mid" : "");
+      box.appendChild(el("span", "score" + band, sc + " / 10"));
+    }
+    top.appendChild(box);
+    body.appendChild(top);
 
-    var facts = el("div", "facts");
+    /* key facts */
+    var stats = el("div", "stats");
+    if (p.acreage) { statTag(stats, "ac", p.acreage); }
+    if (p.pricePerAcre) { statTag(stats, "/ac", money.format(p.pricePerAcre)); }
+    if (p.sqft) { statTag(stats, "sqft", p.sqft.toLocaleString("en-US")); }
+    if (p.bufMinutes || p.bufMiles) {
+      var drive = (p.bufMinutes ? p.bufMinutes + " min" : "");
+      if (p.bufMiles) { drive += (drive ? " / " : "") + p.bufMiles + " mi"; }
+      statTag(stats, "to BUF", drive);
+    }
+    if (p.taxesPerYear) { statTag(stats, "tax/yr", money.format(p.taxesPerYear)); }
+    if (p.daysOnZillow !== null && p.daysOnZillow !== undefined) {
+      statTag(stats, p.daysOnZillow === 1 ? "day listed" : "days listed", p.daysOnZillow);
+    }
+    body.appendChild(stats);
 
-    function fact(label, value, cls) {
-      var f = el("span", "fact" + (cls ? " " + cls : ""));
-      if (label) { f.appendChild(document.createTextNode(label + " ")); }
-      f.appendChild(el("b", null, value));
-      facts.appendChild(f);
+    /* status chips */
+    var chips = el("div", "chips");
+    chip(chips, p.landStatus, colorFor(LAND_COLOR, p.landStatus));
+    if (p.water && slug(p.water) !== "none stated") {
+      chip(chips, p.water, "blue", p.waterDetails || null);
+    }
+    chip(chips, p.zoning, colorFor(ZONING_COLOR, p.zoning), p.zoningNotes || null);
+    if (p.priceCut) {
+      chip(chips, String.fromCharCode(8595) + " " + p.priceCut, "red", "Price cut");
+    }
+    if (chips.childNodes.length) { body.appendChild(chips); }
+
+    /* money */
+    var m = el("div", "money");
+    var cash = compactCash(p.estCashToEnter);
+    if (cash) {
+      var cs = el("span", "cash");
+      cs.appendChild(el("span", null, "Cash to enter "));
+      cs.appendChild(document.createTextNode("~" + cash));
+      m.appendChild(cs);
+    }
+    if (p.financingPath) {
+      var owner = /owner|seller/i.test(p.financingPath);
+      m.appendChild(el("span", "fin" + (owner ? " owner" : ""), p.financingPath));
+    }
+    if (m.childNodes.length) { body.appendChild(m); }
+
+    /* revenue matrix */
+    if (p.revenue) {
+      var wrap = el("div", "revwrap");
+      wrap.appendChild(el("div", "revlab", "Revenue paths"));
+      var row = el("div", "rev");
+      row.setAttribute("role", "list");
+      REVENUE.forEach(function (pair) {
+        var v = p.revenue[pair[0]] || "no";
+        var t = el("span", "rv " + v, pair[1]);
+        t.title = REVENUE_LONG[pair[0]] + ": " + v;
+        t.setAttribute("role", "listitem");
+        row.appendChild(t);
+      });
+      wrap.appendChild(row);
+      body.appendChild(wrap);
     }
 
-    fact("", p.type);
-    if (p.sqft) { fact("", p.sqft.toLocaleString("en-US") + " sqft"); }
-
-    var acres = perAcre(p);
-    if (acres !== null) {
-      fact("", p.acreage + " acres");
-      fact("", money.format(acres) + "/acre");
-    } else {
-      var f = el("span", "fact tbd");
-      f.appendChild(document.createTextNode("acreage "));
-      f.appendChild(el("b", null, "TBD"));
-      facts.appendChild(f);
+    /* sub-scores */
+    var cash10 = score(p.cashScore), speed10 = score(p.speedToRevenue);
+    if (cash10 !== null || speed10 !== null) {
+      var subs = el("div", "subs");
+      if (cash10 !== null) {
+        subs.appendChild(document.createTextNode("Cash "));
+        subs.appendChild(el("b", null, cash10 + "/10"));
+      }
+      if (cash10 !== null && speed10 !== null) {
+        subs.appendChild(document.createTextNode("  " + String.fromCharCode(183) + "  "));
+      }
+      if (speed10 !== null) {
+        subs.appendChild(document.createTextNode("Speed to revenue "));
+        subs.appendChild(el("b", null, speed10 + "/10"));
+      }
+      body.appendChild(subs);
     }
 
-    var mi = bufMiles(p);
-    fact("", (mi === null ? "?" : mi) + " mi to BUF");
-    if (p.notes) { fact("", p.notes, "badge"); }
+    /* utilities + notes */
+    if (p.utilities || p.notes) {
+      var lines = el("div", "lines");
+      if (p.utilities) {
+        var u = el("p");
+        u.appendChild(el("b", null, "Utilities: "));
+        u.appendChild(document.createTextNode(p.utilities));
+        lines.appendChild(u);
+      }
+      if (p.notes) { lines.appendChild(el("p", null, p.notes)); }
+      body.appendChild(lines);
+    }
 
-    c.appendChild(facts);
+    var a = el("a", "zl", "View on Zillow");
+    a.href = zurl(p);
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    body.appendChild(a);
 
-    var link = el("a", "zl", "View on Zillow");
-    link.href = zillowUrl(p);
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    c.appendChild(link);
-
+    c.appendChild(body);
     return c;
   }
 
@@ -545,7 +708,7 @@
     li.id = "p-" + p.id;
     var main = el("div", "m-main");
     var a = el("a", "m-addr", p.address);
-    a.href = zillowUrl(p);
+    a.href = zurl(p);
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     main.appendChild(a);
@@ -553,12 +716,13 @@
     var meta = p.town + ", " + p.zip + dot + p.type;
     if (p.sqft) { meta += dot + p.sqft.toLocaleString("en-US") + " sqft"; }
     main.appendChild(el("div", "m-meta", meta));
+    if (p.notes) { main.appendChild(el("div", "m-meta", p.notes)); }
     li.appendChild(main);
     li.appendChild(el("span", "m-price", money.format(p.price)));
     return li;
   }
 
-  /* ---------- scroll to a card from a map pin ---------- */
+  /* ---------- pin -> card ---------- */
 
   function revealCard(id) {
     var node = $("p-" + id);
@@ -574,18 +738,14 @@
   /* ---------- map ---------- */
 
   function jitter(p) {
-    /* deterministic offset from the parcel id, so pins in one town fan out
-       instead of stacking, and stay put between reloads */
     var h = 0, i;
-    for (i = 0; i < p.id.length; i++) {
-      h = (h * 31 + p.id.charCodeAt(i)) % 100000;
-    }
+    for (i = 0; i < p.id.length; i++) { h = (h * 31 + p.id.charCodeAt(i)) % 100000; }
     var angle = (h % 360) * Math.PI / 180;
     var radius = 0.004 + (h % 7) * 0.0016;
     return { dLat: Math.sin(angle) * radius, dLng: Math.cos(angle) * radius * 1.35 };
   }
 
-  function drawMap(resort, topIds) {
+  function drawMap(resort) {
     if (typeof L === "undefined") {
       $("map").innerHTML = "";
       $("map").appendChild(el("div", "maperr",
@@ -596,23 +756,22 @@
 
     var map = L.map("map", { scrollWheelZoom: false });
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 17,
-      attribution: "&copy; OpenStreetMap contributors"
+      maxZoom: 17, attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
 
     L.circleMarker([BUF.lat, BUF.lng], {
       radius: 7, color: "#2b6cb0", weight: 2, fillColor: "#2b6cb0", fillOpacity: 0.85
-    }).addTo(map).bindPopup("<div class='pop'><b>Buffalo Niagara (BUF)</b>Distances below are driving miles to here.</div>");
+    }).addTo(map).bindPopup("<div class='pop'><b>Buffalo Niagara (BUF)</b>Drive times on the cards are to here.</div>");
 
     var pts = [[BUF.lat, BUF.lng]];
+    var missing = [];
 
     resort.forEach(function (p) {
-      var t = town(p);
-      if (!t) { return; }
+      var t = TOWNS[p.town];
+      if (!t) { missing.push(p.town); return; }
       var j = jitter(p);
-      var lat = t.lat + j.dLat;
-      var lng = t.lng + j.dLng;
-      var isTop = topIds.indexOf(p.id) !== -1;
+      var lat = t.lat + j.dLat, lng = t.lng + j.dLng;
+      var isTop = p.rank <= TOP_N;
       pts.push([lat, lng]);
 
       var marker = L.circleMarker([lat, lng], {
@@ -625,16 +784,14 @@
 
       var pop = el("div", "pop");
       pop.dataset.pid = p.id;
-      pop.appendChild(el("b", null, (isTop ? "#" + (topIds.indexOf(p.id) + 1) + "  " : "") + p.address));
-      pop.appendChild(document.createTextNode(
-        p.town + ", " + p.county + " County"));
-      pop.appendChild(el("div", null, money.format(p.price) + " " + String.fromCharCode(183) + " "
-        + p.type + " " + String.fromCharCode(183) + " " + t.buf + " mi to BUF"));
+      pop.appendChild(el("b", null, "#" + p.rank + "  " + p.address));
+      pop.appendChild(document.createTextNode(p.town + ", " + p.county + " County"));
+      var line = money.format(p.price);
+      if (p.acreage) { line += " " + String.fromCharCode(183) + " " + p.acreage + " ac"; }
+      if (p.bufMinutes) { line += " " + String.fromCharCode(183) + " " + p.bufMinutes + " min to BUF"; }
+      pop.appendChild(el("div", null, line));
       var btn = el("button", null, "Go to listing card");
-      btn.addEventListener("click", function () {
-        map.closePopup();
-        revealCard(p.id);
-      });
+      btn.addEventListener("click", function () { map.closePopup(); revealCard(p.id); });
       pop.appendChild(btn);
       marker.bindPopup(pop);
     });
@@ -643,40 +800,46 @@
 
     /* handy for debugging from the console: document.getElementById("map")._wnyMap */
     $("map")._wnyMap = map;
+
+    if (missing.length) {
+      $("mapNote").appendChild(el("b", null,
+        " " + missing.length + " parcel(s) have no mapped town and are not pinned."));
+    }
   }
 
   /* ---------- render ---------- */
 
   function render(data) {
     $("asOf").textContent = data.lastUpdated || "unknown";
+    if (data.source) { $("srcLine").textContent = "Source: " + data.source; }
 
     var all = data.properties || [];
     var resort = all.filter(function (p) { return p.group === "resort-site"; });
     var metro = all.filter(function (p) { return p.group === "buffalo-metro"; });
 
-    var ranked = rankResort(resort);
-    var top = ranked.slice(0, TOP_N);
-    var rest = ranked.slice(TOP_N);
-    var topIds = top.map(function (p) { return p.id; });
+    /* the rank field is hand-curated; order by it, never recompute */
+    resort.sort(function (a, b) { return a.rank - b.rank; });
 
-    $("topHead").textContent = "Top " + top.length + " of " + ranked.length;
-    rankNote(ranked);
+    var top = resort.slice(0, TOP_N);
+    var rest = resort.slice(TOP_N);
 
-    top.forEach(function (p, i) { $("topCards").appendChild(card(p, i + 1)); });
-    rest.forEach(function (p, i) { $("restCards").appendChild(card(p, TOP_N + i + 1)); });
-    $("restCount").textContent = rest.length + " more resort-site parcels, same ranking";
+    $("topHead").textContent = "Top " + top.length + " of " + resort.length;
+    top.forEach(function (p) { $("topCards").appendChild(card(p)); });
+    rest.forEach(function (p) { $("restCards").appendChild(card(p)); });
+    $("restCount").textContent = rest.length + " more resort-site parcels, ranks "
+      + (rest.length ? rest[0].rank + " to " + rest[rest.length - 1].rank : "");
 
     metro.sort(function (a, b) { return a.price - b.price; });
     metro.forEach(function (p) { $("metroList").appendChild(metroRow(p)); });
     $("metroCount").textContent = metro.length + " listings, separate search - not ranked";
 
-    if (rest.length === 0) { $("restBox").hidden = true; }
-    if (metro.length === 0) { $("metroBox").hidden = true; }
+    if (!rest.length) { $("restBox").hidden = true; }
+    if (!metro.length) { $("metroBox").hidden = true; }
 
     $("status").hidden = true;
     $("main").hidden = false;
 
-    drawMap(resort, topIds);
+    drawMap(resort);
   }
 
   function fail(msg) {
@@ -685,21 +848,33 @@
     s.hidden = false;
   }
 
+  function tryLoad(i, sawAny) {
+    if (i >= SOURCES.length) {
+      fail(sawAny
+        ? "Found a properties file, but it does not carry the scored fields this page needs "
+          + "(rank, overallScore, revenue). Publish the enriched dataset to data/properties.json."
+        : "Could not load properties.json. Reload, or check that the file is published.");
+      return;
+    }
+    fetch(SOURCES[i], { cache: "no-cache" })
+      .then(function (res) {
+        if (!res.ok) { throw new Error("HTTP " + res.status); }
+        return res.json();
+      })
+      .then(function (data) {
+        if (isEnriched(data)) { render(data); return; }
+        tryLoad(i + 1, true);
+      })
+      .catch(function () { tryLoad(i + 1, sawAny); });
+  }
+
   if (location.protocol === "file:") {
-    fail("This page reads data/properties.json, which browsers block on a local file:// page. "
+    fail("This page reads properties.json, which browsers block on a local file:// page. "
       + "Open it through GitHub Pages or a local web server.");
     return;
   }
 
-  fetch("../data/properties.json", { cache: "no-cache" })
-    .then(function (res) {
-      if (!res.ok) { throw new Error("HTTP " + res.status); }
-      return res.json();
-    })
-    .then(render)
-    .catch(function () {
-      fail("Could not load data/properties.json. Reload, or check that the file is published.");
-    });
+  tryLoad(0, false);
 })();
 </script>
 </body>
