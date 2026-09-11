@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%232f6f4e'/%3E%3Cpath d='M3 9.5 8 4l5 5.5v3H3z' fill='%23fff'/%3E%3C/svg%3E">
+<title>Household Scenario Calculator — WNY Planning</title>
+<style>
+  :root {
+    --bg: #f6f7f5;
+    --panel: #ffffff;
+    --ink: #1d2321;
+    --muted: #5f6b66;
+    --line: #dfe4e0;
+    --accent: #2f6f4e;
+    --accent-soft: #e8f1eb;
+    --pos: #1f7a4d;
+    --neg: #b23b2e;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141917;
+      --panel: #1c2320;
+      --ink: #e9eeeb;
+      --muted: #9daaa3;
+      --line: #2e3833;
+      --accent: #6fbf8f;
+      --accent-soft: #22302a;
+      --pos: #6fbf8f;
+      --neg: #e88b7d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 20px 16px 64px; }
+  header { margin-bottom: 20px; }
+  .home {
+    display: inline-block; color: var(--muted); text-decoration: none;
+    font-size: 14px; margin-bottom: 10px;
+  }
+  .home:hover { color: var(--accent); }
+  h1 { font-size: 24px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0; }
+  section {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+  }
+  h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); margin: 0 0 14px; font-weight: 600;
+  }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+  .grid .full { grid-column: 1 / -1; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  .hint { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+  input[type="number"], input[type="text"], select {
+    width: 100%; padding: 10px 11px; font-size: 16px; color: var(--ink);
+    background: var(--bg); border: 1px solid var(--line);
+    border-radius: 8px; font-family: inherit;
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input[readonly] { color: var(--muted); }
+  input[type="range"] { width: 100%; accent-color: var(--accent); margin: 6px 0 0; }
+  .range-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .range-val { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 15px; }
+  .check { display: flex; align-items: center; gap: 9px; margin-top: 8px; }
+  .check input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+  .check label { margin: 0; font-size: 14px; color: var(--ink); }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    flex: 1; padding: 10px 6px; font: inherit; font-size: 14px;
+    background: var(--bg); color: var(--muted);
+    border: 0; border-left: 1px solid var(--line); cursor: pointer;
+  }
+  .seg button:first-child { border-left: 0; }
+  .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .row:last-child { border-bottom: 0; }
+  .row[hidden] { display: none; }
+  .row .k { font-size: 14px; color: var(--muted); }
+  .row .v { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .row.major { padding: 13px 0; }
+  .row.major .k { font-size: 15px; color: var(--ink); font-weight: 600; }
+  .row.major .v { font-size: 20px; }
+  .pos { color: var(--pos); }
+  .neg { color: var(--neg); }
+  .note {
+    font-size: 13px; color: var(--muted); background: var(--accent-soft);
+    border-radius: 8px; padding: 11px 12px; margin-top: 4px;
+  }
+  .msg {
+    font-size: 14px; padding: 11px 12px; border-radius: 8px;
+    background: var(--accent-soft); color: var(--muted); margin-bottom: 12px;
+  }
+  .msg[hidden] { display: none; }
+  .reset {
+    font: inherit; font-size: 14px; padding: 9px 14px; cursor: pointer;
+    background: var(--panel); color: var(--muted);
+    border: 1px solid var(--line); border-radius: 8px;
+  }
+  .reset:hover { color: var(--neg); border-color: var(--neg); }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 22px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <a class="home" href="../">&larr; WNY Planning</a>
+  <h1>Household scenario calculator</h1>
+  <p class="sub">Monthly net position for a March 2027 move, under different property and income scenarios.</p>
+</header>
+
+<section>
+  <h2>Property</h2>
+  <div id="loadMsg" class="msg" hidden></div>
+  <div class="grid">
+    <div class="full">
+      <label for="propertySelect">Pick a listing (optional)</label>
+      <select id="propertySelect">
+        <option value="">— Enter a price manually —</option>
+      </select>
+      <span class="hint" id="propertyMeta">Picking a listing fills the purchase price; you can still edit it.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Purchase</h2>
+  <div class="grid">
+    <div>
+      <label for="price">Purchase price ($)</label>
+      <input type="number" id="price" min="0" step="1000" value="0" inputmode="decimal">
+    </div>
+    <div>
+      <label for="downPct">Down payment (%)</label>
+      <input type="number" id="downPct" min="0" max="100" step="0.1" value="3.5" inputmode="decimal">
+      <span class="hint">3.5% = FHA first-time buyer minimum.</span>
+    </div>
+    <div class="full">
+      <div class="range-head">
+        <label for="rate">Interest rate</label>
+        <span class="range-val"><span id="rateOut">6.500</span>%</span>
+      </div>
+      <input type="range" id="rate" min="5" max="8" step="0.125" value="6.5">
+    </div>
+    <div>
+      <label for="termYears">Term (years)</label>
+      <input type="number" id="termYears" value="30" readonly tabindex="-1">
+    </div>
+    <div>
+      <label for="taxRate">Property tax rate (% of price / yr)</label>
+      <input type="number" id="taxRate" min="0" step="0.01" value="2.5" inputmode="decimal">
+    </div>
+    <div>
+      <label for="insuranceYr">Homeowners insurance ($ / yr)</label>
+      <input type="number" id="insuranceYr" min="0" step="50" value="0" placeholder="e.g. 1800" inputmode="decimal">
+    </div>
+    <div>
+      <label for="miMonthly">Mortgage insurance ($ / mo)</label>
+      <input type="number" id="miMonthly" min="0" step="10" value="0" placeholder="e.g. 150" inputmode="decimal">
+    </div>
+    <div>
+      <label for="upfrontMiPct">Upfront MI (% of base loan)</label>
+      <input type="number" id="upfrontMiPct" min="0" step="0.05" value="1.75" inputmode="decimal">
+      <div class="check">
+        <input type="checkbox" id="financeMi" checked>
+        <label for="financeMi">Finance upfront MI into the loan</label>
+      </div>
+    </div>
+    <div>
+      <label for="closingPct">Closing costs (% of price)</label>
+      <input type="number" id="closingPct" min="0" step="0.1" value="3" inputmode="decimal">
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Household</h2>
+  <div class="grid">
+    <div>
+      <label for="income1">Income 1 — net ($ / mo)</label>
+      <input type="number" id="income1" min="0" step="100" value="0" inputmode="decimal">
+    </div>
+    <div>
+      <label for="income2">Income 2 — net ($ / mo)</label>
+      <input type="number" id="income2" min="0" step="100" value="0" inputmode="decimal">
+      <span class="hint">0 while job-searching; partial for part-time; full figure once employed.</span>
+    </div>
+    <div>
+      <label for="reserves">Cash reserves ($)</label>
+      <input type="number" id="reserves" min="0" step="1000" value="0" inputmode="decimal">
+    </div>
+    <div>
+      <label for="fixedCosts">Other fixed costs ($ / mo)</label>
+      <input type="number" id="fixedCosts" min="0" step="50" value="0" inputmode="decimal">
+      <span class="hint">Utilities, food, vehicles, insurance, debt payments.</span>
+    </div>
+    <div class="full">
+      <label for="rent">Current rent ($ / mo)</label>
+      <input type="number" id="rent" min="0" step="50" value="0" inputmode="decimal">
+      <span class="hint">Used only for the before/after move comparison.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Property income</h2>
+  <div class="grid">
+    <div>
+      <label for="strIncome">Short-term rental ($ / mo)</label>
+      <input type="number" id="strIncome" min="0" step="100" value="0" inputmode="decimal">
+    </div>
+    <div>
+      <label for="landIncome">Other land income ($ / mo)</label>
+      <input type="number" id="landIncome" min="0" step="50" value="0" inputmode="decimal">
+      <span class="hint">Hunting lease, farm lease, timber, etc.</span>
+    </div>
+    <div class="full">
+      <label>Scenario</label>
+      <div class="seg" id="scenario">
+        <button type="button" data-mult="0.6">Conservative &times;0.6</button>
+        <button type="button" data-mult="1" aria-pressed="true">Base &times;1.0</button>
+        <button type="button" data-mult="1.3">Ambitious &times;1.3</button>
+      </div>
+      <span class="hint">Scales both property income figures.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Monthly position</h2>
+  <div class="row"><span class="k">Principal &amp; interest</span><span class="v" id="oPI">$0</span></div>
+  <div class="row"><span class="k">Property tax</span><span class="v" id="oTax">$0</span></div>
+  <div class="row"><span class="k">Homeowners insurance</span><span class="v" id="oIns">$0</span></div>
+  <div class="row"><span class="k">Mortgage insurance</span><span class="v" id="oMI">$0</span></div>
+  <div class="row major"><span class="k">PITI + MI</span><span class="v" id="oPITI">$0</span></div>
+  <div class="row"><span class="k">Other fixed costs</span><span class="v" id="oFixed">$0</span></div>
+  <div class="row major"><span class="k">Total monthly outflow</span><span class="v" id="oOutflow">$0</span></div>
+  <div class="row"><span class="k">Household income</span><span class="v" id="oIncome">$0</span></div>
+  <div class="row"><span class="k">Property income (scenario-adjusted)</span><span class="v" id="oPropInc">$0</span></div>
+  <div class="row major"><span class="k">Monthly household net</span><span class="v" id="oNet">$0</span></div>
+  <div class="row" id="runwayRow" hidden><span class="k">Runway on reserves</span><span class="v" id="oRunway">—</span></div>
+</section>
+
+<section>
+  <h2>Cash to close</h2>
+  <div class="row"><span class="k">Down payment</span><span class="v" id="oDown">$0</span></div>
+  <div class="row"><span class="k">Closing costs</span><span class="v" id="oClosing">$0</span></div>
+  <div class="row" id="miCashRow"><span class="k" id="miCashKey">Upfront MI (financed)</span><span class="v" id="oUpfrontMi">$0</span></div>
+  <div class="row major"><span class="k">Cash needed at closing</span><span class="v" id="oCashToClose">$0</span></div>
+  <div class="row"><span class="k">Loan amount</span><span class="v" id="oLoan">$0</span></div>
+  <div class="row"><span class="k">Reserves left after closing</span><span class="v" id="oAfterClose">$0</span></div>
+</section>
+
+<section>
+  <h2>Before / after the move</h2>
+  <div class="row"><span class="k">Now — renting</span><span class="v" id="oBefore">$0</span></div>
+  <div class="row"><span class="k">After — owning</span><span class="v" id="oAfter">$0</span></div>
+  <div class="row major"><span class="k">Change in monthly net</span><span class="v" id="oDelta">$0</span></div>
+  <p class="note">Both lines use the same household income and fixed costs; only housing (rent vs. PITI+MI) and property income differ.</p>
+</section>
+
+<section>
+  <h2>Privacy</h2>
+  <p class="note" style="margin-top:0">Every figure you type stays in this browser. Values are saved to this device's
+  local storage only &mdash; nothing is written to a file, a URL, or sent anywhere. Clearing below erases them.</p>
+  <button type="button" class="reset" id="resetBtn">Clear saved values</button>
+</section>
+
+<footer>Estimates only &mdash; not a lender quote. Taxes, insurance and MI vary by town and loan program.</footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORE_KEY = "wny-planning.calculator.v1";
+  var TERM_YEARS = 30;
+
+  var FIELDS = [
+    "price", "downPct", "rate", "taxRate", "insuranceYr", "miMonthly",
+    "upfrontMiPct", "closingPct", "income1", "income2", "reserves",
+    "fixedCosts", "rent", "strIncome", "landIncome"
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var money = new Intl.NumberFormat("en-US", {
+    style: "currency", currency: "USD", maximumFractionDigits: 0
+  });
+
+  function num(id) {
+    var v = parseFloat($(id).value);
+    return isFinite(v) ? v : 0;
+  }
+
+  function fmt(el, value) {
+    $(el).textContent = money.format(Math.round(value));
+  }
+
+  function fmtSigned(el, value) {
+    var node = $(el);
+    node.textContent = (value < 0 ? "−" : "") + money.format(Math.abs(Math.round(value)));
+    node.className = "v " + (value < 0 ? "neg" : "pos");
+  }
+
+  /* ---------- persistence (local only, never written to file or URL) ---------- */
+
+  function save() {
+    var state = { scenario: currentMultiplier(), financeMi: $("financeMi").checked };
+    FIELDS.forEach(function (id) { state[id] = $(id).value; });
+    if ($("propertySelect").value) { state.propertyId = $("propertySelect").value; }
+    try {
+      window.localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    } catch (e) { /* private mode, storage disabled or full — keep working in memory */ }
+  }
+
+  function load() {
+    var raw = null;
+    try {
+      raw = window.localStorage.getItem(STORE_KEY);
+    } catch (e) { return null; }
+    if (!raw) { return null; }
+    try {
+      return JSON.parse(raw);
+    } catch (e) { return null; }
+  }
+
+  function restore(state) {
+    if (!state) { return; }
+    FIELDS.forEach(function (id) {
+      if (typeof state[id] === "string" && state[id] !== "") { $(id).value = state[id]; }
+    });
+    if (typeof state.financeMi === "boolean") { $("financeMi").checked = state.financeMi; }
+    if (typeof state.scenario === "number") { setScenario(state.scenario); }
+  }
+
+  /* ---------- scenario toggle ---------- */
+
+  var scenarioButtons = Array.prototype.slice.call($("scenario").querySelectorAll("button"));
+
+  function currentMultiplier() {
+    var active = scenarioButtons.filter(function (b) {
+      return b.getAttribute("aria-pressed") === "true";
+    })[0];
+    return active ? parseFloat(active.getAttribute("data-mult")) : 1;
+  }
+
+  function setScenario(mult) {
+    scenarioButtons.forEach(function (b) {
+      var on = Math.abs(parseFloat(b.getAttribute("data-mult")) - mult) < 1e-9;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  scenarioButtons.forEach(function (b) {
+    b.addEventListener("click", function () {
+      setScenario(parseFloat(b.getAttribute("data-mult")));
+      update();
+    });
+  });
+
+  /* ---------- math ---------- */
+
+  function monthlyPayment(principal, annualRatePct, years) {
+    if (principal <= 0) { return 0; }
+    var n = years * 12;
+    var r = annualRatePct / 100 / 12;
+    if (r <= 0) { return principal / n; }
+    return principal * r / (1 - Math.pow(1 + r, -n));
+  }
+
+  function update() {
+    var price = Math.max(0, num("price"));
+    var downPct = Math.min(100, Math.max(0, num("downPct")));
+    var ratePct = num("rate");
+
+    $("rateOut").textContent = ratePct.toFixed(3);
+
+    var down = price * downPct / 100;
+    var baseLoan = Math.max(0, price - down);
+    var upfrontMi = baseLoan * Math.max(0, num("upfrontMiPct")) / 100;
+    var financed = $("financeMi").checked;
+    var loan = baseLoan + (financed ? upfrontMi : 0);
+
+    var pi = monthlyPayment(loan, ratePct, TERM_YEARS);
+    var tax = price * Math.max(0, num("taxRate")) / 100 / 12;
+    var ins = Math.max(0, num("insuranceYr")) / 12;
+    var mi = Math.max(0, num("miMonthly"));
+    var piti = pi + tax + ins + mi;
+
+    var fixed = Math.max(0, num("fixedCosts"));
+    var outflow = piti + fixed;
+
+    var income = Math.max(0, num("income1")) + Math.max(0, num("income2"));
+    var mult = currentMultiplier();
+    var propInc = (Math.max(0, num("strIncome")) + Math.max(0, num("landIncome"))) * mult;
+
+    var net = income + propInc - outflow;
+
+    fmt("oPI", pi);
+    fmt("oTax", tax);
+    fmt("oIns", ins);
+    fmt("oMI", mi);
+    fmt("oPITI", piti);
+    fmt("oFixed", fixed);
+    fmt("oOutflow", outflow);
+    fmt("oIncome", income);
+    fmt("oPropInc", propInc);
+    fmtSigned("oNet", net);
+
+    if (net < 0) {
+      var reserves = Math.max(0, num("reserves"));
+      var burn = -net;
+      var months = reserves / burn;
+      $("oRunway").textContent = months >= 1200
+        ? "100+ years"
+        : months.toFixed(1) + (months === 1 ? " month" : " months");
+      $("runwayRow").hidden = false;
+    } else {
+      $("runwayRow").hidden = true;
+    }
+
+    var closing = price * Math.max(0, num("closingPct")) / 100;
+    var cashToClose = down + closing + (financed ? 0 : upfrontMi);
+
+    fmt("oDown", down);
+    fmt("oClosing", closing);
+    fmt("oUpfrontMi", upfrontMi);
+    $("miCashKey").textContent = financed
+      ? "Upfront MI (financed — not cash)"
+      : "Upfront MI (paid at closing)";
+    fmt("oCashToClose", cashToClose);
+    fmt("oLoan", loan);
+    fmtSigned("oAfterClose", Math.max(0, num("reserves")) - cashToClose);
+
+    var rent = Math.max(0, num("rent"));
+    var before = income - rent - fixed;
+    fmtSigned("oBefore", before);
+    fmtSigned("oAfter", net);
+    fmtSigned("oDelta", net - before);
+
+    save();
+  }
+
+  /* ---------- property picker ---------- */
+
+  var properties = [];
+
+  function label(p) {
+    var bits = [p.address, p.town];
+    var tail = p.type + (p.sqft ? " · " + p.sqft.toLocaleString("en-US") + " sqft" : "");
+    return bits.join(", ") + " — " + money.format(p.price) + " · " + tail;
+  }
+
+  var dataDate = "";
+
+  function withDate(text) {
+    return dataDate ? text + " · listings as of " + dataDate : text;
+  }
+
+  function describe(p) {
+    var parts = [p.county + " County", p.type];
+    if (p.sqft) { parts.push(p.sqft.toLocaleString("en-US") + " sqft"); }
+    if (p.acreage) { parts.push(p.acreage + " acres"); }
+    if (p.notes) { parts.push(p.notes); }
+    return parts.join(" · ");
+  }
+
+  function buildOptions(list) {
+    var select = $("propertySelect");
+    var groups = [
+      { key: "resort-site", title: "Resort site" },
+      { key: "buffalo-metro", title: "Buffalo metro" }
+    ];
+
+    groups.forEach(function (g) {
+      var inGroup = list.filter(function (p) { return p.group === g.key; });
+      var counties = [];
+      inGroup.forEach(function (p) {
+        if (counties.indexOf(p.county) === -1) { counties.push(p.county); }
+      });
+      counties.sort();
+
+      counties.forEach(function (county) {
+        var og = document.createElement("optgroup");
+        og.label = g.title + " — " + county + " County";
+        inGroup
+          .filter(function (p) { return p.county === county; })
+          .sort(function (a, b) { return a.price - b.price; })
+          .forEach(function (p) {
+            var opt = document.createElement("option");
+            opt.value = p.id;
+            opt.textContent = label(p);
+            og.appendChild(opt);
+          });
+        select.appendChild(og);
+      });
+    });
+  }
+
+  $("propertySelect").addEventListener("change", function () {
+    var id = this.value;
+    var p = properties.filter(function (x) { return x.id === id; })[0];
+    if (p) {
+      $("price").value = p.price;
+      $("propertyMeta").textContent = withDate(describe(p));
+    } else {
+      $("propertyMeta").textContent =
+        withDate("Picking a listing fills the purchase price; you can still edit it.");
+    }
+    update();
+  });
+
+  function message(text) {
+    var box = $("loadMsg");
+    box.textContent = text;
+    box.hidden = false;
+  }
+
+  function loadProperties(savedId) {
+    if (location.protocol === "file:") {
+      message("Listings can't load from a local file:// page — browsers block the fetch. "
+        + "Open this through GitHub Pages or any local web server to use the picker. "
+        + "Everything else works: just type a purchase price.");
+      return;
+    }
+    fetch("../data/properties.json", { cache: "no-cache" })
+      .then(function (res) {
+        if (!res.ok) { throw new Error("HTTP " + res.status); }
+        return res.json();
+      })
+      .then(function (data) {
+        properties = (data && data.properties) || [];
+        dataDate = (data && data.lastUpdated) || "";
+        buildOptions(properties);
+        var restored = null;
+        if (savedId) {
+          var select = $("propertySelect");
+          select.value = savedId;
+          if (select.value === savedId) {
+            restored = properties.filter(function (x) { return x.id === savedId; })[0] || null;
+          }
+        }
+        $("propertyMeta").textContent = restored
+          ? withDate(describe(restored))
+          : withDate("Picking a listing fills the purchase price; you can still edit it.");
+      })
+      .catch(function () {
+        message("Couldn't load the listings file (data/properties.json). "
+          + "The calculator still works — type a purchase price below.");
+      });
+  }
+
+  /* ---------- wiring ---------- */
+
+  FIELDS.forEach(function (id) {
+    $(id).addEventListener("input", update);
+  });
+  $("financeMi").addEventListener("change", update);
+
+  $("resetBtn").addEventListener("click", function () {
+    try {
+      window.localStorage.removeItem(STORE_KEY);
+    } catch (e) { /* nothing stored */ }
+    window.location.reload();
+  });
+
+  var saved = load();
+  restore(saved);
+  loadProperties(saved && saved.propertyId);
+  update();
+})();
+</script>
+</body>
+</html>
