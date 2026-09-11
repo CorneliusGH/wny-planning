@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%232f6f4e'/%3E%3Cpath d='M3 9.5 8 4l5 5.5v3H3z' fill='%23fff'/%3E%3C/svg%3E">
+<title>Acreage shortlist — WNY Planning</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root {
+    --bg: #f6f7f5;
+    --panel: #ffffff;
+    --ink: #1d2321;
+    --muted: #5f6b66;
+    --line: #dfe4e0;
+    --accent: #2f6f4e;
+    --accent-soft: #e8f1eb;
+    --warm: #9a6b1f;
+    --warm-soft: #f7efdf;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141917;
+      --panel: #1c2320;
+      --ink: #e9eeeb;
+      --muted: #9daaa3;
+      --line: #2e3833;
+      --accent: #6fbf8f;
+      --accent-soft: #22302a;
+      --warm: #d8b06a;
+      --warm-soft: #322a1c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 18px 14px 56px; }
+  a { color: var(--accent); }
+  .home {
+    display: inline-block; color: var(--muted); text-decoration: none;
+    font-size: 14px; margin-bottom: 10px;
+  }
+  .home:hover { color: var(--accent); }
+  h1 { font-size: 23px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 10px; }
+  .asof {
+    display: inline-block; font-size: 12px; color: var(--muted);
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 999px; padding: 3px 11px;
+  }
+  h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); margin: 26px 0 10px; font-weight: 600;
+  }
+  .note {
+    font-size: 13px; color: var(--muted); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; margin: 12px 0;
+  }
+  .note b { color: var(--ink); font-weight: 600; }
+
+  #map {
+    height: 300px; border-radius: var(--radius);
+    border: 1px solid var(--line); background: var(--panel);
+    margin-bottom: 8px; z-index: 0;
+  }
+  @media (min-width: 620px) { #map { height: 400px; } }
+  .maperr {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%; padding: 20px; text-align: center;
+    color: var(--muted); font-size: 14px;
+  }
+  .leaflet-container { font: inherit; border-radius: var(--radius); }
+  .pop { font-size: 13px; line-height: 1.45; }
+  .pop b { display: block; font-size: 14px; margin-bottom: 2px; }
+  .pop button {
+    margin-top: 6px; font: inherit; font-size: 13px; cursor: pointer;
+    background: var(--accent); color: #fff; border: 0;
+    border-radius: 6px; padding: 5px 10px;
+  }
+
+  .cards { display: grid; gap: 10px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 13px 14px;
+    scroll-margin-top: 14px;
+  }
+  .card.flash { animation: flash 1.6s ease-out; }
+  @keyframes flash {
+    0%, 45% { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    100% { border-color: var(--line); box-shadow: none; }
+  }
+  .card-top { display: flex; gap: 10px; align-items: baseline; }
+  .rank {
+    flex: none; font-size: 12px; font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); border-radius: 6px;
+    padding: 2px 7px; font-variant-numeric: tabular-nums;
+  }
+  .addr { font-weight: 600; font-size: 16px; }
+  .where { color: var(--muted); font-size: 13px; margin-top: 1px; }
+  .price {
+    margin-left: auto; flex: none; font-weight: 700;
+    font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .facts {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 10px; font-size: 12.5px;
+  }
+  .fact {
+    background: var(--bg); border: 1px solid var(--line);
+    border-radius: 999px; padding: 3px 9px; color: var(--muted);
+  }
+  .fact b { color: var(--ink); font-weight: 600; }
+  .fact.badge { background: var(--warm-soft); border-color: transparent; color: var(--warm); font-weight: 600; }
+  .fact.tbd { color: var(--muted); font-style: italic; }
+  .card a.zl {
+    display: inline-block; margin-top: 11px; font-size: 13.5px;
+    font-weight: 600; text-decoration: none;
+  }
+  .card a.zl:hover { text-decoration: underline; }
+
+  details {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); margin-top: 12px; overflow: hidden;
+  }
+  details > summary {
+    cursor: pointer; padding: 13px 14px; font-weight: 600; font-size: 15px;
+    list-style: none;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::before { content: "\25b8\00a0"; color: var(--accent); font-weight: 700; }
+  details[open] > summary::before { content: "\25be\00a0"; }
+  details > summary span { display: block; font-weight: 400; font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .details-body { padding: 0 14px 14px; }
+  .details-body .cards { margin-top: 2px; }
+  .details-body .card { background: var(--bg); }
+
+  ul.metro { list-style: none; margin: 0; padding: 0; }
+  ul.metro li {
+    display: flex; gap: 10px; align-items: baseline;
+    padding: 10px 0; border-bottom: 1px solid var(--line);
+    scroll-margin-top: 14px;
+  }
+  ul.metro li:last-child { border-bottom: 0; }
+  ul.metro .m-main { min-width: 0; }
+  ul.metro .m-addr { font-weight: 600; font-size: 15px; }
+  ul.metro a { text-decoration: none; }
+  ul.metro a:hover { text-decoration: underline; }
+  ul.metro .m-meta { color: var(--muted); font-size: 13px; }
+  ul.metro .m-price {
+    margin-left: auto; flex: none; font-weight: 600;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+
+  .loading { color: var(--muted); font-size: 14px; padding: 20px 0; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <a class="home" href="../">&larr; WNY Planning</a>
+  <h1>Acreage shortlist</h1>
+  <p class="sub">Land and small-acreage parcels in Western New York, within reach of Buffalo.</p>
+  <span class="asof">Data as of <span id="asOf">&hellip;</span></span>
+</header>
+
+<div id="status" class="loading">Loading properties&hellip;</div>
+
+<main id="main" hidden>
+
+  <div id="map"></div>
+  <p class="note" id="mapNote">
+    <b>Pins are town-level.</b> Each parcel is placed at its town centre and nudged apart so
+    overlapping listings stay clickable &mdash; not at the exact lot. Tap a pin to jump to its card.
+  </p>
+
+  <h2 id="topHead">Top 15</h2>
+  <p class="note" id="rankNote"></p>
+  <div class="cards" id="topCards"></div>
+
+  <details id="restBox">
+    <summary>Everything else<span id="restCount"></span></summary>
+    <div class="details-body"><div class="cards" id="restCards"></div></div>
+  </details>
+
+  <details id="metroBox">
+    <summary>Buffalo city &mdash; residence/office search<span id="metroCount"></span></summary>
+    <div class="details-body"><ul class="metro" id="metroList"></ul></div>
+  </details>
+
+</main>
+
+<footer>Prices and details as listed; verify acreage, taxes and access before making an offer.</footer>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var BUF = { lat: 42.9405, lng: -78.7322 };
+  var TOP_N = 15;
+
+  /* Town centroids and approximate driving miles to Buffalo Niagara (BUF).
+     Covers every town present in data/properties.json. */
+  var TOWNS = {
+        "Akron": {
+            "buf": 17,
+            "lat": 43.0195,
+            "lng": -78.4947
+        },
+        "Albion": {
+            "buf": 42,
+            "lat": 43.2465,
+            "lng": -78.1936
+        },
+        "Angola": {
+            "buf": 30,
+            "lat": 42.6381,
+            "lng": -79.0284
+        },
+        "Ashville": {
+            "buf": 78,
+            "lat": 42.1023,
+            "lng": -79.4034
+        },
+        "Attica": {
+            "buf": 30,
+            "lat": 42.8642,
+            "lng": -78.2814
+        },
+        "Belfast": {
+            "buf": 64,
+            "lat": 42.3417,
+            "lng": -78.1128
+        },
+        "Belmont": {
+            "buf": 75,
+            "lat": 42.2231,
+            "lng": -78.0342
+        },
+        "Bemus Pt": {
+            "buf": 72,
+            "lat": 42.162,
+            "lng": -79.3892
+        },
+        "Bliss": {
+            "buf": 44,
+            "lat": 42.5695,
+            "lng": -78.2506
+        },
+        "Buffalo": {
+            "buf": 11,
+            "lat": 42.8864,
+            "lng": -78.8784
+        },
+        "Cherry Creek": {
+            "buf": 58,
+            "lat": 42.2937,
+            "lng": -79.1198
+        },
+        "Conewango Valley": {
+            "buf": 60,
+            "lat": 42.1978,
+            "lng": -79.0028
+        },
+        "Corfu": {
+            "buf": 22,
+            "lat": 42.9578,
+            "lng": -78.3975
+        },
+        "Cuba": {
+            "buf": 68,
+            "lat": 42.2206,
+            "lng": -78.2753
+        },
+        "Darien Center": {
+            "buf": 23,
+            "lat": 42.9089,
+            "lng": -78.3892
+        },
+        "Delevan": {
+            "buf": 40,
+            "lat": 42.4898,
+            "lng": -78.4797
+        },
+        "Derby": {
+            "buf": 25,
+            "lat": 42.6892,
+            "lng": -78.9808
+        },
+        "Dunkirk": {
+            "buf": 50,
+            "lat": 42.4795,
+            "lng": -79.3339
+        },
+        "East Concord": {
+            "buf": 32,
+            "lat": 42.5484,
+            "lng": -78.6203
+        },
+        "East Otto": {
+            "buf": 42,
+            "lat": 42.4109,
+            "lng": -78.7503
+        },
+        "Ellicottville": {
+            "buf": 52,
+            "lat": 42.2762,
+            "lng": -78.6731
+        },
+        "Elma": {
+            "buf": 12,
+            "lat": 42.8206,
+            "lng": -78.6392
+        },
+        "Fillmore": {
+            "buf": 58,
+            "lat": 42.467,
+            "lng": -78.1128
+        },
+        "Fredonia": {
+            "buf": 52,
+            "lat": 42.4401,
+            "lng": -79.3317
+        },
+        "Frewsburg": {
+            "buf": 76,
+            "lat": 42.0556,
+            "lng": -79.1556
+        },
+        "Friendship": {
+            "buf": 72,
+            "lat": 42.2039,
+            "lng": -78.1392
+        },
+        "Gainesville": {
+            "buf": 45,
+            "lat": 42.6584,
+            "lng": -78.1339
+        },
+        "Great Valley": {
+            "buf": 55,
+            "lat": 42.252,
+            "lng": -78.622
+        },
+        "Jamestown": {
+            "buf": 73,
+            "lat": 42.097,
+            "lng": -79.2353
+        },
+        "Kenmore": {
+            "buf": 10,
+            "lat": 42.9653,
+            "lng": -78.87
+        },
+        "Kennedy": {
+            "buf": 70,
+            "lat": 42.1123,
+            "lng": -79.0906
+        },
+        "Mount Morris": {
+            "buf": 55,
+            "lat": 42.7248,
+            "lng": -77.8756
+        },
+        "Olean": {
+            "buf": 70,
+            "lat": 42.0778,
+            "lng": -78.4297
+        },
+        "Perrysburg": {
+            "buf": 40,
+            "lat": 42.4645,
+            "lng": -78.985
+        },
+        "Portland": {
+            "buf": 60,
+            "lat": 42.3856,
+            "lng": -79.467
+        },
+        "Ripley": {
+            "buf": 80,
+            "lat": 42.267,
+            "lng": -79.7159
+        },
+        "Scio": {
+            "buf": 82,
+            "lat": 42.1645,
+            "lng": -77.9975
+        },
+        "Silver Creek": {
+            "buf": 40,
+            "lat": 42.5445,
+            "lng": -79.167
+        },
+        "South Dayton": {
+            "buf": 48,
+            "lat": 42.3623,
+            "lng": -79.0473
+        },
+        "Stockton": {
+            "buf": 60,
+            "lat": 42.3253,
+            "lng": -79.3809
+        },
+        "Swain": {
+            "buf": 68,
+            "lat": 42.4506,
+            "lng": -77.8989
+        }
+    };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var money = new Intl.NumberFormat("en-US", {
+    style: "currency", currency: "USD", maximumFractionDigits: 0
+  });
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (text !== undefined) { n.textContent = text; }
+    return n;
+  }
+
+  function zillowUrl(p) {
+    if (p.zillowPath) { return "https://www.zillow.com" + p.zillowPath; }
+    return "https://www.zillow.com/homedetails/" + p.id + "_zpid/";
+  }
+
+  function town(p) { return TOWNS[p.town] || null; }
+
+  function bufMiles(p) {
+    var t = town(p);
+    return t ? t.buf : null;
+  }
+
+  function perAcre(p) {
+    if (p.acreage && p.acreage > 0) { return p.price / p.acreage; }
+    return null;
+  }
+
+  /* ---------- ranking ----------
+     Primary: lowest price per acre when acreage is known. Parcels with no acreage
+     yet fall back to lowest price, and rank after the priced-per-acre ones (the two
+     figures are not comparable). Ties break on the shortest drive to BUF. */
+
+  function rankResort(list) {
+    return list.slice().sort(function (a, b) {
+      var pa = perAcre(a), pb = perAcre(b);
+      if (pa !== null && pb === null) { return -1; }
+      if (pa === null && pb !== null) { return 1; }
+      var ka = pa !== null ? pa : a.price;
+      var kb = pb !== null ? pb : b.price;
+      if (ka !== kb) { return ka - kb; }
+      var da = bufMiles(a), db = bufMiles(b);
+      if (da === null) { da = 9999; }
+      if (db === null) { db = 9999; }
+      if (da !== db) { return da - db; }
+      return a.price - b.price;
+    });
+  }
+
+  function rankNote(ranked) {
+    var withAcres = ranked.filter(function (p) { return perAcre(p) !== null; }).length;
+    var note = $("rankNote");
+    note.textContent = "";
+    var b = el("b", null, withAcres === 0
+      ? "Ranked by price, closest drive to Buffalo breaking ties."
+      : "Ranked by price per acre where acreage is known, then by price.");
+    note.appendChild(b);
+    note.appendChild(document.createTextNode(withAcres === 0
+      ? " No acreage figures are in the data yet, so every parcel is ranked on price alone -"
+        + " once acreage lands, parcels with a known $/acre will rank first."
+      : " " + withAcres + " of " + ranked.length + " parcels have acreage; the rest are ranked on price"
+        + " and listed after them."));
+  }
+
+  /* ---------- cards ---------- */
+
+  function card(p, rank) {
+    var c = el("div", "card");
+    c.id = "p-" + p.id;
+
+    var top = el("div", "card-top");
+    var badge = el("span", "rank", "#" + rank);
+    var main = el("div");
+    main.appendChild(el("div", "addr", p.address));
+    main.appendChild(el("div", "where", p.town + ", " + p.county + " County " + p.zip));
+    var price = el("span", "price", money.format(p.price));
+    top.appendChild(badge);
+    top.appendChild(main);
+    top.appendChild(price);
+    c.appendChild(top);
+
+    var facts = el("div", "facts");
+
+    function fact(label, value, cls) {
+      var f = el("span", "fact" + (cls ? " " + cls : ""));
+      if (label) { f.appendChild(document.createTextNode(label + " ")); }
+      f.appendChild(el("b", null, value));
+      facts.appendChild(f);
+    }
+
+    fact("", p.type);
+    if (p.sqft) { fact("", p.sqft.toLocaleString("en-US") + " sqft"); }
+
+    var acres = perAcre(p);
+    if (acres !== null) {
+      fact("", p.acreage + " acres");
+      fact("", money.format(acres) + "/acre");
+    } else {
+      var f = el("span", "fact tbd");
+      f.appendChild(document.createTextNode("acreage "));
+      f.appendChild(el("b", null, "TBD"));
+      facts.appendChild(f);
+    }
+
+    var mi = bufMiles(p);
+    fact("", (mi === null ? "?" : mi) + " mi to BUF");
+    if (p.notes) { fact("", p.notes, "badge"); }
+
+    c.appendChild(facts);
+
+    var link = el("a", "zl", "View on Zillow");
+    link.href = zillowUrl(p);
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    c.appendChild(link);
+
+    return c;
+  }
+
+  function metroRow(p) {
+    var li = el("li");
+    li.id = "p-" + p.id;
+    var main = el("div", "m-main");
+    var a = el("a", "m-addr", p.address);
+    a.href = zillowUrl(p);
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    main.appendChild(a);
+    var dot = " " + String.fromCharCode(183) + " ";
+    var meta = p.town + ", " + p.zip + dot + p.type;
+    if (p.sqft) { meta += dot + p.sqft.toLocaleString("en-US") + " sqft"; }
+    main.appendChild(el("div", "m-meta", meta));
+    li.appendChild(main);
+    li.appendChild(el("span", "m-price", money.format(p.price)));
+    return li;
+  }
+
+  /* ---------- scroll to a card from a map pin ---------- */
+
+  function revealCard(id) {
+    var node = $("p-" + id);
+    if (!node) { return; }
+    var box = node.closest ? node.closest("details") : null;
+    if (box) { box.open = true; }
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    node.classList.remove("flash");
+    void node.offsetWidth;
+    node.classList.add("flash");
+  }
+
+  /* ---------- map ---------- */
+
+  function jitter(p) {
+    /* deterministic offset from the parcel id, so pins in one town fan out
+       instead of stacking, and stay put between reloads */
+    var h = 0, i;
+    for (i = 0; i < p.id.length; i++) {
+      h = (h * 31 + p.id.charCodeAt(i)) % 100000;
+    }
+    var angle = (h % 360) * Math.PI / 180;
+    var radius = 0.004 + (h % 7) * 0.0016;
+    return { dLat: Math.sin(angle) * radius, dLng: Math.cos(angle) * radius * 1.35 };
+  }
+
+  function drawMap(resort, topIds) {
+    if (typeof L === "undefined") {
+      $("map").innerHTML = "";
+      $("map").appendChild(el("div", "maperr",
+        "The map library could not load, so the map is unavailable. The listings below are unaffected."));
+      $("mapNote").hidden = true;
+      return;
+    }
+
+    var map = L.map("map", { scrollWheelZoom: false });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 17,
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+
+    L.circleMarker([BUF.lat, BUF.lng], {
+      radius: 7, color: "#2b6cb0", weight: 2, fillColor: "#2b6cb0", fillOpacity: 0.85
+    }).addTo(map).bindPopup("<div class='pop'><b>Buffalo Niagara (BUF)</b>Distances below are driving miles to here.</div>");
+
+    var pts = [[BUF.lat, BUF.lng]];
+
+    resort.forEach(function (p) {
+      var t = town(p);
+      if (!t) { return; }
+      var j = jitter(p);
+      var lat = t.lat + j.dLat;
+      var lng = t.lng + j.dLng;
+      var isTop = topIds.indexOf(p.id) !== -1;
+      pts.push([lat, lng]);
+
+      var marker = L.circleMarker([lat, lng], {
+        radius: isTop ? 9 : 5,
+        color: isTop ? "#2f6f4e" : "#8a9691",
+        weight: isTop ? 3 : 1.5,
+        fillColor: isTop ? "#2f6f4e" : "#c9d2cd",
+        fillOpacity: isTop ? 0.9 : 0.65
+      }).addTo(map);
+
+      var pop = el("div", "pop");
+      pop.dataset.pid = p.id;
+      pop.appendChild(el("b", null, (isTop ? "#" + (topIds.indexOf(p.id) + 1) + "  " : "") + p.address));
+      pop.appendChild(document.createTextNode(
+        p.town + ", " + p.county + " County"));
+      pop.appendChild(el("div", null, money.format(p.price) + " " + String.fromCharCode(183) + " "
+        + p.type + " " + String.fromCharCode(183) + " " + t.buf + " mi to BUF"));
+      var btn = el("button", null, "Go to listing card");
+      btn.addEventListener("click", function () {
+        map.closePopup();
+        revealCard(p.id);
+      });
+      pop.appendChild(btn);
+      marker.bindPopup(pop);
+    });
+
+    map.fitBounds(pts, { padding: [24, 24] });
+
+    /* handy for debugging from the console: document.getElementById("map")._wnyMap */
+    $("map")._wnyMap = map;
+  }
+
+  /* ---------- render ---------- */
+
+  function render(data) {
+    $("asOf").textContent = data.lastUpdated || "unknown";
+
+    var all = data.properties || [];
+    var resort = all.filter(function (p) { return p.group === "resort-site"; });
+    var metro = all.filter(function (p) { return p.group === "buffalo-metro"; });
+
+    var ranked = rankResort(resort);
+    var top = ranked.slice(0, TOP_N);
+    var rest = ranked.slice(TOP_N);
+    var topIds = top.map(function (p) { return p.id; });
+
+    $("topHead").textContent = "Top " + top.length + " of " + ranked.length;
+    rankNote(ranked);
+
+    top.forEach(function (p, i) { $("topCards").appendChild(card(p, i + 1)); });
+    rest.forEach(function (p, i) { $("restCards").appendChild(card(p, TOP_N + i + 1)); });
+    $("restCount").textContent = rest.length + " more resort-site parcels, same ranking";
+
+    metro.sort(function (a, b) { return a.price - b.price; });
+    metro.forEach(function (p) { $("metroList").appendChild(metroRow(p)); });
+    $("metroCount").textContent = metro.length + " listings, separate search - not ranked";
+
+    if (rest.length === 0) { $("restBox").hidden = true; }
+    if (metro.length === 0) { $("metroBox").hidden = true; }
+
+    $("status").hidden = true;
+    $("main").hidden = false;
+
+    drawMap(resort, topIds);
+  }
+
+  function fail(msg) {
+    var s = $("status");
+    s.textContent = msg;
+    s.hidden = false;
+  }
+
+  if (location.protocol === "file:") {
+    fail("This page reads data/properties.json, which browsers block on a local file:// page. "
+      + "Open it through GitHub Pages or a local web server.");
+    return;
+  }
+
+  fetch("../data/properties.json", { cache: "no-cache" })
+    .then(function (res) {
+      if (!res.ok) { throw new Error("HTTP " + res.status); }
+      return res.json();
+    })
+    .then(render)
+    .catch(function () {
+      fail("Could not load data/properties.json. Reload, or check that the file is published.");
+    });
+})();
+</script>
+</body>
+</html>
