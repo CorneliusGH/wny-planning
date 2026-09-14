@@ -1,0 +1,24 @@
+{
+ "source": "City of Buffalo crime incidents export 2026-09-13; last-24-month window (2024-09-13..2026-09-13); metric = violent incidents (homicide, sexual offenses, assault, robbery) per 1,000 residents per year, approx ACS populations; score = rate/3, floor 1, cap 10",
+ "asOf": "2026-09-13",
+ "scale": "1 safest - 10 most dangerous. Tiers: Low <3.5, Moderate <5.5, Elevated <7.5, High <8.5, Dangerous >=8.5. Zips absent here (14217 Kenmore, 14218, 14223, 14225 and other suburbs) are outside Buffalo PD coverage: no score, treat neutrally as approx 2.5 with a no-city-data note",
+ "scores": {
+  "14216": {"score": 1.2, "tier": "Low", "violentPer1kYr": 3.5},
+  "14222": {"score": 1.4, "tier": "Low", "violentPer1kYr": 4.2},
+  "14214": {"score": 1.7, "tier": "Low", "violentPer1kYr": 5.1},
+  "14220": {"score": 1.8, "tier": "Low", "violentPer1kYr": 5.5},
+  "14206": {"score": 2.1, "tier": "Low", "violentPer1kYr": 6.3},
+  "14209": {"score": 2.2, "tier": "Low", "violentPer1kYr": 6.5},
+  "14208": {"score": 2.3, "tier": "Low", "violentPer1kYr": 7.0},
+  "14210": {"score": 2.4, "tier": "Low", "violentPer1kYr": 7.2},
+  "14213": {"score": 2.5, "tier": "Low", "violentPer1kYr": 7.6},
+  "14215": {"score": 3.0, "tier": "Low", "violentPer1kYr": 9.0},
+  "14212": {"score": 3.1, "tier": "Low", "violentPer1kYr": 9.2},
+  "14204": {"score": 3.6, "tier": "Moderate", "violentPer1kYr": 10.7},
+  "14211": {"score": 4.0, "tier": "Moderate", "violentPer1kYr": 12.0},
+  "14207": {"score": 4.0, "tier": "Moderate", "violentPer1kYr": 12.1},
+  "14202": {"score": 6.7, "tier": "Elevated", "violentPer1kYr": 20.1},
+  "14201": {"score": 8.9, "tier": "Dangerous", "violentPer1kYr": 26.8},
+  "14203": {"score": 10.0, "tier": "Dangerous", "violentPer1kYr": 127.2}
+ }
+}

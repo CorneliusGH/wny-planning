@@ -7,15 +7,29 @@
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; max-width: 640px; margin: 4rem auto; padding: 0 1rem; color: #222; }
     h1 { margin-bottom: 0.5rem; }
-    ul { line-height: 2; font-size: 1.1rem; }
+    h2 { font-size: 1.1rem; margin: 2rem 0 0.25rem; }
+    h2 .tag { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #2f6f4e; background: #e8f1eb; border-radius: 999px; padding: 2px 9px; margin-left: 0.5rem; vertical-align: 0.15em; }
+    h2 .tag.paused { color: #6b6257; background: #f0ece5; }
+    p.lede { color: #555; margin: 0.25rem 0 0; }
+    ul { line-height: 2; font-size: 1.1rem; margin-top: 0.5rem; }
   </style>
 </head>
 <body>
   <h1>WNY Planning</h1>
-  <p>Planning tools and documents.</p>
+  <p>Planning tools and documents for two property tracks.</p>
+
+  <h2>Duplex hunt <span class="tag">Primary</span></h2>
+  <p class="lede">Buying a Buffalo duplex to live in one unit and short-term-rent the other.</p>
   <ul>
-    <li><a href="calculator/">Calculator</a></li>
-    <li><a href="brief/">Brief</a></li>
+    <li><a href="brief/">Brief</a> — ranked duplexes, park distance, crime and condition</li>
+    <li><a href="calculator/">Calculator</a> — house-hack carry cost after the rental offset</li>
+  </ul>
+
+  <h2>Land search <span class="tag paused">Resuming soon</span></h2>
+  <p class="lede">The Western NY acreage search, paused for a few months. Tooling stays live.</p>
+  <ul>
+    <li><a href="brief/#land">Land shortlist</a> — ranked parcels, scores and map</li>
+    <li><a href="calculator/#land">Land + home calculator</a></li>
   </ul>
 </body>
 </html>

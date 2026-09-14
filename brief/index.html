@@ -4,22 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%232f6f4e'/%3E%3Cpath d='M3 9.5 8 4l5 5.5v3H3z' fill='%23fff'/%3E%3C/svg%3E">
-<title>Acreage shortlist — WNY Planning</title>
+<title>Buffalo duplex hunt — WNY Planning</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root {
-    --bg: #f6f7f5;
-    --panel: #ffffff;
-    --ink: #1d2321;
-    --muted: #5f6b66;
-    --faint: #93a09a;
-    --line: #dfe4e0;
-    --accent: #2f6f4e;
-    --accent-soft: #e8f1eb;
+    --bg: #f6f7f5; --panel: #ffffff; --ink: #1d2321; --muted: #5f6b66;
+    --faint: #93a09a; --line: #dfe4e0; --accent: #2f6f4e; --accent-soft: #e8f1eb;
     --radius: 11px;
-
     --c-green: #1f7a4d;   --c-green-bg: #e4f1e9;
     --c-yellow: #8a6410;  --c-yellow-bg: #f9efd8;
+    --c-orange: #a1560f;  --c-orange-bg: #fae5d3;
     --c-gray: #5f6b66;    --c-gray-bg: #ebeeec;
     --c-brown: #7a4f29;   --c-brown-bg: #f2e7dc;
     --c-blue: #1e5f8f;    --c-blue-bg: #e1edf6;
@@ -28,17 +22,11 @@
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #141917;
-      --panel: #1c2320;
-      --ink: #e9eeeb;
-      --muted: #9daaa3;
-      --faint: #6b7a73;
-      --line: #2e3833;
-      --accent: #6fbf8f;
-      --accent-soft: #22302a;
-
+      --bg: #141917; --panel: #1c2320; --ink: #e9eeeb; --muted: #9daaa3;
+      --faint: #6b7a73; --line: #2e3833; --accent: #6fbf8f; --accent-soft: #22302a;
       --c-green: #7cc79b;   --c-green-bg: #1e3328;
       --c-yellow: #d9b56d;  --c-yellow-bg: #332c1a;
+      --c-orange: #e0a06a;  --c-orange-bg: #35271a;
       --c-gray: #9daaa3;    --c-gray-bg: #272f2b;
       --c-brown: #cf9d6f;   --c-brown-bg: #332619;
       --c-blue: #7bb4dd;    --c-blue-bg: #1a2a36;
@@ -47,11 +35,9 @@
     }
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
+  body { margin: 0; background: var(--bg); color: var(--ink);
     font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-text-size-adjust: 100%;
-  }
+    -webkit-text-size-adjust: 100%; }
   .wrap { max-width: 880px; margin: 0 auto; padding: 18px 14px 56px; }
   a { color: var(--accent); }
   .home { display: inline-block; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 10px; }
@@ -66,10 +52,12 @@
   .note { font-size: 13px; color: var(--muted); background: var(--panel);
     border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 12px 0; }
   .note b { color: var(--ink); font-weight: 600; }
+  .empty { background: var(--panel); border: 1px dashed var(--line); border-radius: var(--radius);
+    padding: 26px 18px; text-align: center; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
 
-  #map { height: 300px; border-radius: var(--radius); border: 1px solid var(--line);
+  .map { height: 300px; border-radius: var(--radius); border: 1px solid var(--line);
     background: var(--panel); margin-bottom: 8px; z-index: 0; }
-  @media (min-width: 620px) { #map { height: 400px; } }
+  @media (min-width: 620px) { .map { height: 400px; } }
   .maperr { display: flex; align-items: center; justify-content: center; height: 100%;
     padding: 20px; text-align: center; color: var(--muted); font-size: 14px; }
   .leaflet-container { font: inherit; border-radius: var(--radius); }
@@ -77,8 +65,9 @@
   .pop b { display: block; font-size: 14px; margin-bottom: 2px; }
   .pop button { margin-top: 6px; font: inherit; font-size: 13px; cursor: pointer;
     background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 5px 10px; }
+  .park-label { font-size: 11px; font-weight: 700; color: var(--c-green);
+    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff; white-space: nowrap; }
 
-  /* ---- dossier card ---- */
   .cards { display: grid; gap: 12px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
     overflow: hidden; scroll-margin-top: 14px; }
@@ -87,13 +76,14 @@
     0%, 45% { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
     100% { border-color: var(--line); box-shadow: none; }
   }
-  /* the photo and its placeholder MUST share these box rules, so real photos
+  .card.dim { opacity: 0.62; }
+  .card.dim:hover, .card.dim:focus-within { opacity: 1; }
+
+  /* photo box: image and placeholder MUST share these rules so real photos
      drop in later without reflowing the card */
   .shot, .shot-ph { width: 100%; aspect-ratio: 16 / 9; max-height: 150px; }
-  .shot { display: block; object-fit: cover; background: var(--bg);
-    border-bottom: 1px solid var(--line); }
-  .shot-ph {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  .shot { display: block; object-fit: cover; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .shot-ph { display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 2px; border-bottom: 1px solid var(--line);
     background: repeating-linear-gradient(135deg, var(--bg), var(--bg) 9px, transparent 9px, transparent 18px); }
   .shot-ph .c { font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
@@ -123,16 +113,35 @@
   .stat b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
   .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-  .chip { font-size: 11.5px; font-weight: 600; border-radius: 999px;
-    padding: 3px 9px; white-space: nowrap; }
+  .chip { font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
   .chip.green  { color: var(--c-green);  background: var(--c-green-bg); }
   .chip.yellow { color: var(--c-yellow); background: var(--c-yellow-bg); }
+  .chip.orange { color: var(--c-orange); background: var(--c-orange-bg); }
   .chip.gray   { color: var(--c-gray);   background: var(--c-gray-bg); }
   .chip.brown  { color: var(--c-brown);  background: var(--c-brown-bg); }
   .chip.blue   { color: var(--c-blue);   background: var(--c-blue-bg); }
   .chip.purple { color: var(--c-purple); background: var(--c-purple-bg); }
   .chip.red    { color: var(--c-red);    background: var(--c-red-bg); }
   .chip[title] { cursor: help; border-bottom: 1px dotted currentColor; }
+
+  /* the two headline factors, side by side and deliberately loud */
+  .head2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .hstat { border-radius: 9px; padding: 9px 11px; background: var(--bg); border: 1px solid var(--line); }
+  .hstat .hk { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--faint); font-weight: 600; }
+  .hstat .hv { font-size: 16px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .hstat .hn { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .hstat.crime[title] { cursor: help; }
+  .hstat.crime.green  { background: var(--c-green-bg);  border-color: transparent; }
+  .hstat.crime.green .hv  { color: var(--c-green); }
+  .hstat.crime.yellow { background: var(--c-yellow-bg); border-color: transparent; }
+  .hstat.crime.yellow .hv { color: var(--c-yellow); }
+  .hstat.crime.orange { background: var(--c-orange-bg); border-color: transparent; }
+  .hstat.crime.orange .hv { color: var(--c-orange); }
+  .hstat.crime.red    { background: var(--c-red-bg);    border-color: transparent; }
+  .hstat.crime.red .hv    { color: var(--c-red); }
+  .hstat.crime.gray   { background: var(--c-gray-bg);   border-color: transparent; }
+  .hstat.crime.gray .hv   { color: var(--c-gray); font-size: 14px; }
 
   .money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 9px;
     margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--line); }
@@ -141,6 +150,8 @@
   .fin { font-size: 12.5px; color: var(--muted); }
   .fin.owner { color: var(--c-green); background: var(--c-green-bg); font-weight: 700;
     border-radius: 999px; padding: 2px 9px; }
+  .offset { font-size: 13px; color: var(--c-green); font-weight: 700; white-space: nowrap; }
+  .rentnow { font-size: 12px; color: var(--muted); }
 
   .revwrap { margin-top: 11px; }
   .revlab { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
@@ -153,8 +164,7 @@
     padding: 4px 1px; border: 1px solid transparent; overflow: hidden;
     text-overflow: ellipsis; white-space: nowrap; cursor: help; }
   .rv.yes { color: #fff; background: var(--c-green); border-color: var(--c-green); }
-  .rv.maybe { color: var(--c-green); background: transparent; border-color: var(--c-green);
-    opacity: 0.75; }
+  .rv.maybe { color: var(--c-green); background: transparent; border-color: var(--c-green); opacity: 0.75; }
   .rv.no { color: var(--faint); background: var(--bg); opacity: 0.4; font-weight: 400; }
   @media (prefers-color-scheme: dark) { .rv.yes { color: #11201a; } }
 
@@ -178,18 +188,8 @@
   .details-body { padding: 0 12px 13px; }
   .details-body .card { background: var(--bg); }
   .details-body .shot-ph { background: repeating-linear-gradient(135deg, var(--panel), var(--panel) 9px, transparent 9px, transparent 18px); }
-
-  ul.metro { list-style: none; margin: 0; padding: 0; }
-  ul.metro li { display: flex; gap: 10px; align-items: baseline; padding: 10px 2px;
-    border-bottom: 1px solid var(--line); scroll-margin-top: 14px; }
-  ul.metro li:last-child { border-bottom: 0; }
-  ul.metro .m-main { min-width: 0; }
-  ul.metro .m-addr { font-weight: 600; font-size: 15px; }
-  ul.metro a { text-decoration: none; }
-  ul.metro a:hover { text-decoration: underline; }
-  ul.metro .m-meta { color: var(--muted); font-size: 13px; }
-  ul.metro .m-price { margin-left: auto; flex: none; font-weight: 600;
-    font-variant-numeric: tabular-nums; white-space: nowrap; }
+  details.major > summary { font-size: 16px; background: var(--accent-soft); color: var(--accent); }
+  details.major > summary span { color: var(--muted); }
 
   .loading { color: var(--muted); font-size: 14px; padding: 20px 0; }
   footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 26px; }
@@ -200,8 +200,8 @@
 
 <header>
   <a class="home" href="../">&larr; WNY Planning</a>
-  <h1>Acreage shortlist</h1>
-  <p class="sub">Ranked land and small-acreage parcels in Western New York, within reach of Buffalo.</p>
+  <h1>Buffalo duplex hunt</h1>
+  <p class="sub">Live in one unit, short-term-rent the other. Ranked by the factors Andrew and Emily weigh most: distance to Delaware Park, then block-level crime.</p>
   <span class="asof">Data as of <span id="asOf">&hellip;</span></span>
   <span class="src" id="srcLine"></span>
 </header>
@@ -210,29 +210,62 @@
 
 <main id="main" hidden>
 
-  <div id="map"></div>
-  <p class="note" id="mapNote">
-    <b>Pins are town-level.</b> Each parcel sits at its town centre, nudged apart so overlapping
-    listings stay clickable &mdash; not at the exact lot. Tap a pin to jump to its card.
-  </p>
+  <section id="duplexSection">
+    <div id="dmap" class="map"></div>
+    <p class="note" id="dmapNote">
+      <b>Delaware Park is starred.</b> Pins sit at each property's own coordinates where the
+      data has them, and are coloured by crime tier. Tap a pin to jump to its card.
+    </p>
 
-  <h2 id="topHead">Top 15</h2>
-  <p class="note" id="rankNote"><b>Ordered by the hand-curated rank</b> in the dataset, not recomputed here.</p>
-  <div class="cards" id="topCards"></div>
+    <h2 id="duplexHead">Duplexes</h2>
+    <div class="cards" id="duplexCards"></div>
+    <div class="empty" id="duplexEmpty" hidden>
+      No duplexes analyzed yet &mdash; the Monday/Thursday monitor populates this from
+      Andrew's Zillow favorites.
+    </div>
 
-  <details id="restBox">
-    <summary>Everything else<span id="restCount"></span></summary>
-    <div class="details-body"><div class="cards" id="restCards"></div></div>
-  </details>
+    <details id="rentedBox" hidden>
+      <summary>Fully rented &mdash; excluded<span id="rentedCount"></span></summary>
+      <div class="details-body"><div class="cards" id="rentedCards"></div></div>
+    </details>
 
-  <details id="metroBox">
-    <summary>Buffalo city &mdash; residence/office search<span id="metroCount"></span></summary>
-    <div class="details-body"><ul class="metro" id="metroList"></ul></div>
+    <details id="crimeBox" hidden>
+      <summary>High crime block &mdash; excluded<span id="crimeCount"></span></summary>
+      <div class="details-body"><div class="cards" id="crimeCards"></div></div>
+    </details>
+
+    <details id="pendingBox" hidden>
+      <summary>Pending / Sold<span id="pendingCount"></span></summary>
+      <div class="details-body"><div class="cards" id="pendingCards"></div></div>
+    </details>
+
+    <details id="passedBox" hidden>
+      <summary>Passed<span id="passedCount"></span></summary>
+      <div class="details-body"><div class="cards" id="passedCards"></div></div>
+    </details>
+  </section>
+
+  <details id="landBox" class="major">
+    <summary>Land search &mdash; resuming soon<span id="landCount"></span></summary>
+    <div class="details-body">
+      <div id="map" class="map"></div>
+      <p class="note" id="mapNote">
+        <b>Pins are town-level.</b> Each parcel sits at its town centre, nudged apart so overlapping
+        listings stay clickable &mdash; not at the exact lot. Tap a pin to jump to its card.
+      </p>
+      <h2 id="topHead">Top 15</h2>
+      <p class="note"><b>Ordered by the hand-curated rank</b> in the dataset, not recomputed here.</p>
+      <div class="cards" id="topCards"></div>
+      <details id="restBox">
+        <summary>Everything else<span id="restCount"></span></summary>
+        <div class="details-body"><div class="cards" id="restCards"></div></div>
+      </details>
+    </div>
   </details>
 
 </main>
 
-<footer>Scores and notes are our own working judgements; verify acreage, taxes, zoning and access before making an offer.</footer>
+<footer>Scores and notes are our own working judgements; verify taxes, rents, condition and access before making an offer.</footer>
 
 </div>
 
@@ -242,11 +275,12 @@
   "use strict";
 
   var BUF = { lat: 42.9405, lng: -78.7322 };
+  var PARK = { lat: 42.9339, lng: -78.8648, name: "Delaware Park" };
   var TOP_N = 15;
 
-  /* The dataset has no coordinates, so the map places each parcel at its town
-     centre. Driving figures on the cards come from the data itself (bufMiles /
-     bufMinutes); the miles here are only a fallback. */
+  /* The dataset has no coordinates for land parcels, so the land map places each at
+     its town centre. Duplex rows carry their own latitude/longitude; this table is
+     only their fallback. */
   var TOWNS = {
         "Akron": {
             "buf": 17,
@@ -460,9 +494,8 @@
         }
     };
 
-  /* The enriched dataset has lived at more than one path; take whichever copy
-     actually carries the scored fields. */
-  var SOURCES = ["../data/properties.json", "../properties.json"];
+  var SOURCES = ["../properties.json", "../data/properties.json"];
+  var CRIME_SOURCE = "../data/crime-scores.json";
 
   var REVENUE = [
     ["strDwelling", "STR"], ["huntingLease", "Hunt"], ["timber", "Timber"],
@@ -492,8 +525,12 @@
     ["hostile", "red"]
   ];
 
+  var CRIME_TIP = "Violent-crime score for the blocks within ~500m of this address, "
+    + "from Buffalo PD incident data (1 safest - 10 most dangerous).";
+
   var $ = function (id) { return document.getElementById(id); };
   var money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  var crimeZips = {};
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -502,20 +539,12 @@
     return n;
   }
 
-  /* "Habitable - year-round" and "Zoned - light" differ only in punctuation
-     between sources, so match on letters and digits alone. */
-  function slug(v) {
-    return String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-  }
+  function slug(v) { return String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
 
   function colorFor(table, value) {
     var s = slug(value), i;
-    for (i = 0; i < table.length; i++) {
-      if (s === table[i][0]) { return table[i][1]; }
-    }
-    for (i = 0; i < table.length; i++) {
-      if (s.indexOf(table[i][0]) !== -1) { return table[i][1]; }
-    }
+    for (i = 0; i < table.length; i++) { if (s === table[i][0]) { return table[i][1]; } }
+    for (i = 0; i < table.length; i++) { if (s.indexOf(table[i][0]) !== -1) { return table[i][1]; } }
     return "gray";
   }
 
@@ -536,31 +565,62 @@
     return "https://www.zillow.com/homedetails/" + p.id + "_zpid/";
   }
 
-  function isEnriched(data) {
-    var ps = (data && data.properties) || [];
-    var i;
-    for (i = 0; i < ps.length; i++) {
-      if (ps[i].group === "resort-site") {
-        return typeof ps[i].rank === "number" && typeof ps[i].overallScore === "number";
-      }
-    }
-    return false;
+  function num(v) { return typeof v === "number" && isFinite(v); }
+
+  /* ---------- crime ---------- */
+
+  function tierFor(s) {
+    if (s < 3.5) { return "Low"; }
+    if (s < 5.5) { return "Moderate"; }
+    if (s < 7.5) { return "Elevated"; }
+    if (s < 8.5) { return "High"; }
+    return "Dangerous";
   }
 
-  /* ---------- card ---------- */
+  function crimeColor(s) {
+    if (s < 3.5) { return "green"; }
+    if (s < 5.5) { return "yellow"; }
+    if (s < 7.5) { return "orange"; }
+    return "red";
+  }
+
+  /* A null Crime Score means the address sits outside Buffalo PD coverage, not that
+     the block is safe. Fall back to the zip baseline when one exists (a gap inside
+     the city); a suburb has neither and is reported as having no city data. */
+  function crimeOf(p) {
+    if (num(p.crimeScore)) {
+      return { score: p.crimeScore, tier: tierFor(p.crimeScore), level: "block" };
+    }
+    var z = crimeZips[p.zip];
+    if (z && num(z.score)) {
+      return { score: z.score, tier: z.tier || tierFor(z.score), level: "zip" };
+    }
+    return null;
+  }
+
+  /* ---------- shared card pieces ---------- */
+
+  function placeholder(p, caption) {
+    var ph = el("div", "shot-ph");
+    var name = p.neighborhood || p.county || p.town || "";
+    if (!p.neighborhood && p.county) { name += " County"; }
+    ph.appendChild(el("div", "c", name));
+    ph.appendChild(el("div", "t", caption));
+    return ph;
+  }
 
   function photo(p) {
-    if (p.photo) {
-      var img = el("img", "shot");
-      img.src = p.photo;
-      img.alt = p.address + ", " + p.town;
-      img.loading = "lazy";
-      return img;
-    }
-    var ph = el("div", "shot-ph");
-    ph.appendChild(el("div", "c", p.county + " County"));
-    ph.appendChild(el("div", "t", "photo to come"));
-    return ph;
+    if (!p.photo) { return placeholder(p, "photo to come"); }
+    var img = el("img", "shot");
+    img.src = p.photo;
+    img.alt = p.address + ", " + p.town;
+    img.loading = "lazy";
+    /* listing photo URLs expire; swap in the placeholder rather than leaving a
+       broken-image icon. Both share one box rule, so nothing reflows. */
+    img.addEventListener("error", function () {
+      if (img.parentNode) { img.parentNode.replaceChild(placeholder(p, "photo unavailable"), img); }
+    });
+    return img;
   }
 
   function statTag(parent, label, value) {
@@ -578,31 +638,167 @@
     parent.appendChild(c);
   }
 
-  function card(p) {
-    var c = el("article", "card");
-    c.id = "p-" + p.id;
-    c.appendChild(photo(p));
-
-    var body = el("div", "body");
-
-    /* header */
+  function header(p, extraScore) {
     var top = el("div", "card-top");
-    top.appendChild(el("span", "rank", "#" + p.rank));
+    if (num(p.rank)) { top.appendChild(el("span", "rank", "#" + p.rank)); }
     var who = el("div", "who");
     who.appendChild(el("div", "addr", p.address));
-    who.appendChild(el("div", "where", p.town + ", " + p.county + " County " + p.zip));
+    who.appendChild(el("div", "where", extraScore));
     top.appendChild(who);
     var box = el("div", "pricebox");
-    box.appendChild(el("span", "price", money.format(p.price)));
+    box.appendChild(el("span", "price", num(p.price) ? money.format(p.price) : "price TBD"));
     var sc = score(p.overallScore);
     if (sc !== null) {
       var band = p.overallScore >= 7.5 ? " hi" : (p.overallScore >= 6 ? " mid" : "");
       box.appendChild(el("span", "score" + band, sc + " / 10"));
     }
     top.appendChild(box);
-    body.appendChild(top);
+    return top;
+  }
+
+  function zillowButton(p) {
+    var a = el("a", "zl", "View on Zillow");
+    a.href = zurl(p);
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    return a;
+  }
+
+  /* ---------- duplex card ---------- */
+
+  var OCCUPANCY_COLOR = [
+    ["vacant", "green"], ["partially rented", "yellow"],
+    ["fully rented", "red"], ["unknown", "gray"]
+  ];
+
+  function duplexCard(p, dim) {
+    var c = el("article", "card" + (dim ? " dim" : ""));
+    c.id = "p-" + p.id;
+    c.appendChild(photo(p));
+
+    var body = el("div", "body");
+    /* neighborhood and town are the same word in the suburbs; don't say it twice */
+    var wparts = [];
+    if (p.neighborhood) { wparts.push(p.neighborhood); }
+    if (p.town && slug(p.town) !== slug(p.neighborhood)) { wparts.push(p.town); }
+    if (p.zip) { wparts.push(p.zip); }
+    var where = wparts.join(", ");
+    body.appendChild(header(p, where));
+
+    /* the two headline factors */
+    var head2 = el("div", "head2");
+
+    var park = el("div", "hstat");
+    park.appendChild(el("div", "hk", "Delaware Park"));
+    if (num(p.parkMiles) || num(p.parkMinutes)) {
+      var bits = [];
+      if (num(p.parkMiles)) { bits.push(p.parkMiles + " mi"); }
+      if (num(p.parkMinutes)) { bits.push(p.parkMinutes + " min"); }
+      park.appendChild(el("div", "hv", bits.join(" " + String.fromCharCode(183) + " ")));
+    } else {
+      park.appendChild(el("div", "hv", "not measured"));
+    }
+    head2.appendChild(park);
+
+    var cr = crimeOf(p);
+    var crimeBox = el("div", "hstat crime " + (cr ? crimeColor(cr.score) : "gray"));
+    crimeBox.appendChild(el("div", "hk", cr && cr.level === "zip" ? "Crime (zip)" : "Crime (block)"));
+    if (cr) {
+      crimeBox.appendChild(el("div", "hv", score(cr.score) + " " + String.fromCharCode(183) + " " + cr.tier));
+      crimeBox.title = cr.level === "zip"
+        ? "No block-level score for this address; showing the zip-wide baseline for "
+          + p.zip + " from Buffalo PD incident data (1 safest - 10 most dangerous)."
+        : CRIME_TIP;
+      if (cr.level === "zip") { crimeBox.appendChild(el("div", "hn", "zip baseline, not block")); }
+    } else {
+      crimeBox.appendChild(el("div", "hv", "No city data"));
+      crimeBox.appendChild(el("div", "hn", "outside Buffalo PD coverage"));
+      crimeBox.title = "This address is outside Buffalo PD's reporting area, so no city "
+        + "crime score exists for it. Absence of a score is not evidence of safety.";
+    }
+    head2.appendChild(crimeBox);
+    body.appendChild(head2);
 
     /* key facts */
+    var stats = el("div", "stats");
+    if (p.unitsConfig) { statTag(stats, "", p.unitsConfig); }
+    if (num(p.sqft)) { statTag(stats, "sqft", p.sqft.toLocaleString("en-US")); }
+    if (num(p.yearBuilt)) { statTag(stats, "built", p.yearBuilt); }
+    if (num(p.daysOnZillow)) { statTag(stats, p.daysOnZillow === 1 ? "day listed" : "days listed", p.daysOnZillow); }
+    if (stats.childNodes.length) { body.appendChild(stats); }
+
+    /* status chips */
+    var chips = el("div", "chips");
+    if (p.occupancy) { chip(chips, p.occupancy, colorFor(OCCUPANCY_COLOR, p.occupancy)); }
+    if (num(p.maintenanceRisk)) {
+      var mc = p.maintenanceRisk <= 3 ? "green" : (p.maintenanceRisk <= 6 ? "yellow" : "red");
+      chip(chips, "Maintenance " + p.maintenanceRisk + "/10", mc,
+        p.maintenanceNotes || "Maintenance risk, 1 low to 10 high.");
+    }
+    if (p.priceCut) { chip(chips, String.fromCharCode(8595) + " " + p.priceCut, "red", "Price cut"); }
+    if (p.status && slug(p.status) !== "active") { chip(chips, p.status, "gray"); }
+    if (chips.childNodes.length) { body.appendChild(chips); }
+
+    /* cost row */
+    var m = el("div", "money");
+    var costs = [];
+    if (num(p.taxesPerYear)) { costs.push(money.format(p.taxesPerYear) + " tax"); }
+    if (num(p.extraCostsPerYear)) { costs.push(money.format(p.extraCostsPerYear) + " extras"); }
+    if (costs.length) {
+      var cs = el("span", "cash");
+      cs.appendChild(document.createTextNode(costs.join(" + ")));
+      cs.appendChild(el("span", null, " / yr"));
+      m.appendChild(cs);
+    }
+    if (num(p.estStrMonthly)) {
+      m.appendChild(el("span", "offset", "Est. STR offset ~" + money.format(p.estStrMonthly) + "/mo"));
+    }
+    if (num(p.currentRent) && p.currentRent > 0) {
+      m.appendChild(el("span", "rentnow", "tenant pays " + money.format(p.currentRent) + "/mo now"));
+    }
+    if (m.childNodes.length) { body.appendChild(m); }
+
+    /* condition + features */
+    var feat = el("div", "chips");
+    chip(feat, p.roof ? "Roof: " + p.roof : "Roof: not disclosed", p.roof ? "gray" : "gray");
+    if (p.garage) { chip(feat, p.garage, "gray"); }
+    if (p.ac) { chip(feat, "AC: " + p.ac, "gray"); }
+    if (p.heating) { chip(feat, p.heating, "gray"); }
+    if (p.bath) { chip(feat, p.bath, slug(p.bath).indexOf("full") === 0 ? "green" : "gray"); }
+    if (p.evCharger === "yes") { chip(feat, "EV charger", "green"); }
+    else if (p.evCharger === "maybe") { chip(feat, "EV charger possible", "gray"); }
+    if (p.generator === "yes") { chip(feat, "Generator", "green"); }
+    else if (p.generator === "maybe") { chip(feat, "Generator possible", "gray"); }
+    if (p.schoolDistrict) { chip(feat, p.schoolDistrict + " schools", "blue"); }
+    body.appendChild(feat);
+
+    if (p.systemsNotes || p.notes) {
+      var lines = el("div", "lines");
+      if (p.systemsNotes) {
+        var s = el("p");
+        s.appendChild(el("b", null, "Systems: "));
+        s.appendChild(document.createTextNode(p.systemsNotes));
+        lines.appendChild(s);
+      }
+      if (p.notes) { lines.appendChild(el("p", null, p.notes)); }
+      body.appendChild(lines);
+    }
+
+    body.appendChild(zillowButton(p));
+    c.appendChild(body);
+    return c;
+  }
+
+  /* ---------- land card (unchanged dossier) ---------- */
+
+  function landCard(p) {
+    var c = el("article", "card");
+    c.id = "p-" + p.id;
+    c.appendChild(photo(p));
+
+    var body = el("div", "body");
+    body.appendChild(header(p, p.town + ", " + p.county + " County " + p.zip));
+
     var stats = el("div", "stats");
     if (p.acreage) { statTag(stats, "ac", p.acreage); }
     if (p.pricePerAcre) { statTag(stats, "/ac", money.format(p.pricePerAcre)); }
@@ -618,19 +814,15 @@
     }
     body.appendChild(stats);
 
-    /* status chips */
     var chips = el("div", "chips");
     chip(chips, p.landStatus, colorFor(LAND_COLOR, p.landStatus));
     if (p.water && slug(p.water) !== "none stated") {
       chip(chips, p.water, "blue", p.waterDetails || null);
     }
     chip(chips, p.zoning, colorFor(ZONING_COLOR, p.zoning), p.zoningNotes || null);
-    if (p.priceCut) {
-      chip(chips, String.fromCharCode(8595) + " " + p.priceCut, "red", "Price cut");
-    }
+    if (p.priceCut) { chip(chips, String.fromCharCode(8595) + " " + p.priceCut, "red", "Price cut"); }
     if (chips.childNodes.length) { body.appendChild(chips); }
 
-    /* money */
     var m = el("div", "money");
     var cash = compactCash(p.estCashToEnter);
     if (cash) {
@@ -645,7 +837,6 @@
     }
     if (m.childNodes.length) { body.appendChild(m); }
 
-    /* revenue matrix */
     if (p.revenue) {
       var wrap = el("div", "revwrap");
       wrap.appendChild(el("div", "revlab", "Revenue paths"));
@@ -662,7 +853,6 @@
       body.appendChild(wrap);
     }
 
-    /* sub-scores */
     var cash10 = score(p.cashScore), speed10 = score(p.speedToRevenue);
     if (cash10 !== null || speed10 !== null) {
       var subs = el("div", "subs");
@@ -680,7 +870,6 @@
       body.appendChild(subs);
     }
 
-    /* utilities + notes */
     if (p.utilities || p.notes) {
       var lines = el("div", "lines");
       if (p.utilities) {
@@ -693,33 +882,9 @@
       body.appendChild(lines);
     }
 
-    var a = el("a", "zl", "View on Zillow");
-    a.href = zurl(p);
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    body.appendChild(a);
-
+    body.appendChild(zillowButton(p));
     c.appendChild(body);
     return c;
-  }
-
-  function metroRow(p) {
-    var li = el("li");
-    li.id = "p-" + p.id;
-    var main = el("div", "m-main");
-    var a = el("a", "m-addr", p.address);
-    a.href = zurl(p);
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    main.appendChild(a);
-    var dot = " " + String.fromCharCode(183) + " ";
-    var meta = p.town + ", " + p.zip + dot + p.type;
-    if (p.sqft) { meta += dot + p.sqft.toLocaleString("en-US") + " sqft"; }
-    main.appendChild(el("div", "m-meta", meta));
-    if (p.notes) { main.appendChild(el("div", "m-meta", p.notes)); }
-    li.appendChild(main);
-    li.appendChild(el("span", "m-price", money.format(p.price)));
-    return li;
   }
 
   /* ---------- pin -> card ---------- */
@@ -727,15 +892,105 @@
   function revealCard(id) {
     var node = $("p-" + id);
     if (!node) { return; }
+    /* the card may sit inside nested collapsed sections; open all of them */
     var box = node.closest ? node.closest("details") : null;
-    if (box) { box.open = true; }
+    while (box) {
+      box.open = true;
+      box = box.parentNode && box.parentNode.closest ? box.parentNode.closest("details") : null;
+    }
     node.scrollIntoView({ behavior: "smooth", block: "center" });
     node.classList.remove("flash");
     void node.offsetWidth;
     node.classList.add("flash");
   }
 
-  /* ---------- map ---------- */
+  function mapFailed(id, noteId) {
+    $(id).innerHTML = "";
+    $(id).appendChild(el("div", "maperr",
+      "The map library could not load, so the map is unavailable. The listings below are unaffected."));
+    if (noteId) { $(noteId).hidden = true; }
+  }
+
+  function tiles(map) {
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18, attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+  }
+
+  function popupFor(map, p, title, lines) {
+    var pop = el("div", "pop");
+    pop.dataset.pid = p.id;
+    pop.appendChild(el("b", null, title));
+    lines.forEach(function (t) { if (t) { pop.appendChild(el("div", null, t)); } });
+    var btn = el("button", null, "Go to listing card");
+    btn.addEventListener("click", function () { map.closePopup(); revealCard(p.id); });
+    pop.appendChild(btn);
+    return pop;
+  }
+
+  /* ---------- duplex map ---------- */
+
+  var CRIME_PIN = { green: "#1f7a4d", yellow: "#b08313", orange: "#c4700f", red: "#a83228", gray: "#8a9691" };
+
+  function drawDuplexMap(list) {
+    if (typeof L === "undefined") { mapFailed("dmap", "dmapNote"); return; }
+
+    var map = L.map("dmap", { scrollWheelZoom: false });
+    tiles(map);
+    $("dmap")._wnyMap = map;
+
+    /* Delaware Park: a star, deliberately unlike the round property pins */
+    var star = "M 0,-13 L 3.2,-4.2 12.4,-4 5.1,1.6 7.8,10.5 0,5.2 -7.8,10.5 -5.1,1.6 -12.4,-4 -3.2,-4.2 Z";
+    var ParkIcon = L.divIcon({
+      className: "",
+      html: '<svg width="30" height="30" viewBox="-15 -15 30 30" aria-hidden="true">'
+        + '<path d="' + star + '" fill="#2f6f4e" stroke="#fff" stroke-width="1.6"/></svg>',
+      iconSize: [30, 30], iconAnchor: [15, 15]
+    });
+    L.marker([PARK.lat, PARK.lng], { icon: ParkIcon, title: PARK.name, zIndexOffset: 1000 })
+      .addTo(map).bindPopup("<div class='pop'><b>Delaware Park</b>The anchor for the park-distance stat on every card.</div>");
+    L.marker([PARK.lat, PARK.lng], {
+      icon: L.divIcon({ className: "", html: '<div class="park-label">Delaware Park</div>',
+        iconSize: [110, 14], iconAnchor: [-10, 7] }),
+      interactive: false
+    }).addTo(map);
+
+    var pts = [[PARK.lat, PARK.lng]];
+    var approx = 0;
+
+    list.forEach(function (p) {
+      var lat = p.latitude, lng = p.longitude, exact = true;
+      if (!num(lat) || !num(lng)) {
+        var t = TOWNS[p.town];
+        if (!t) { return; }
+        lat = t.lat; lng = t.lng; exact = false; approx++;
+      }
+      var cr = crimeOf(p);
+      var col = CRIME_PIN[cr ? crimeColor(cr.score) : "gray"];
+      pts.push([lat, lng]);
+
+      L.circleMarker([lat, lng], {
+        radius: 9, color: col, weight: 3, fillColor: col, fillOpacity: 0.72
+      }).addTo(map).bindPopup(popupFor(map, p,
+        (num(p.rank) ? "#" + p.rank + "  " : "") + p.address,
+        [[p.neighborhood, p.town].filter(Boolean).join(", "),
+         (num(p.price) ? money.format(p.price) : "price TBD")
+           + (p.unitsConfig ? " " + String.fromCharCode(183) + " " + p.unitsConfig : ""),
+         cr ? "Crime " + score(cr.score) + " (" + cr.tier + (cr.level === "zip" ? ", zip" : "") + ")"
+            : "No city crime data",
+         exact ? null : "approximate location (town centre)"]));
+    });
+
+    if (pts.length === 1) { map.setView([PARK.lat, PARK.lng], 12); }
+    else { map.fitBounds(pts, { padding: [30, 30], maxZoom: 15 }); }
+
+    if (approx) {
+      $("dmapNote").appendChild(el("b", null,
+        " " + approx + " pin(s) lack coordinates and sit at the town centre."));
+    }
+  }
+
+  /* ---------- land map (town centroids, unchanged) ---------- */
 
   function jitter(p) {
     var h = 0, i;
@@ -745,19 +1000,11 @@
     return { dLat: Math.sin(angle) * radius, dLng: Math.cos(angle) * radius * 1.35 };
   }
 
-  function drawMap(resort) {
-    if (typeof L === "undefined") {
-      $("map").innerHTML = "";
-      $("map").appendChild(el("div", "maperr",
-        "The map library could not load, so the map is unavailable. The listings below are unaffected."));
-      $("mapNote").hidden = true;
-      return;
-    }
+  function drawLandMap(resort) {
+    if (typeof L === "undefined") { mapFailed("map", "mapNote"); return; }
 
     var map = L.map("map", { scrollWheelZoom: false });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 17, attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
+    tiles(map);
 
     L.circleMarker([BUF.lat, BUF.lng], {
       radius: 7, color: "#2b6cb0", weight: 2, fillColor: "#2b6cb0", fillOpacity: 0.85
@@ -774,31 +1021,20 @@
       var isTop = p.rank <= TOP_N;
       pts.push([lat, lng]);
 
-      var marker = L.circleMarker([lat, lng], {
+      L.circleMarker([lat, lng], {
         radius: isTop ? 9 : 5,
         color: isTop ? "#2f6f4e" : "#8a9691",
         weight: isTop ? 3 : 1.5,
         fillColor: isTop ? "#2f6f4e" : "#c9d2cd",
         fillOpacity: isTop ? 0.9 : 0.65
-      }).addTo(map);
-
-      var pop = el("div", "pop");
-      pop.dataset.pid = p.id;
-      pop.appendChild(el("b", null, "#" + p.rank + "  " + p.address));
-      pop.appendChild(document.createTextNode(p.town + ", " + p.county + " County"));
-      var line = money.format(p.price);
-      if (p.acreage) { line += " " + String.fromCharCode(183) + " " + p.acreage + " ac"; }
-      if (p.bufMinutes) { line += " " + String.fromCharCode(183) + " " + p.bufMinutes + " min to BUF"; }
-      pop.appendChild(el("div", null, line));
-      var btn = el("button", null, "Go to listing card");
-      btn.addEventListener("click", function () { map.closePopup(); revealCard(p.id); });
-      pop.appendChild(btn);
-      marker.bindPopup(pop);
+      }).addTo(map).bindPopup(popupFor(map, p, "#" + p.rank + "  " + p.address,
+        [p.town + ", " + p.county + " County",
+         money.format(p.price)
+           + (p.acreage ? " " + String.fromCharCode(183) + " " + p.acreage + " ac" : "")
+           + (p.bufMinutes ? " " + String.fromCharCode(183) + " " + p.bufMinutes + " min to BUF" : "")]));
     });
 
     map.fitBounds(pts, { padding: [24, 24] });
-
-    /* handy for debugging from the console: document.getElementById("map")._wnyMap */
     $("map")._wnyMap = map;
 
     if (missing.length) {
@@ -807,39 +1043,90 @@
     }
   }
 
+  /* A Leaflet map created inside a closed <details> has zero size and renders
+     blank when opened, so tell it to remeasure the first time it is revealed. */
+  function fixMapOnReveal(box, mapId) {
+    box.addEventListener("toggle", function () {
+      if (!box.open) { return; }
+      var m = $(mapId) && $(mapId)._wnyMap;
+      if (m) { m.invalidateSize(); }
+    });
+  }
+
   /* ---------- render ---------- */
+
+  function bucket(p) {
+    var s = slug(p.status);
+    if (s.indexOf("fully rented") !== -1) { return "rented"; }
+    if (s.indexOf("high crime") !== -1) { return "crime"; }
+    if (s.indexOf("pending") !== -1 || s.indexOf("sold") !== -1) { return "pending"; }
+    if (s.indexOf("passed") !== -1) { return "passed"; }
+    return "active";
+  }
+
+  function byRank(a, b) {
+    var ra = num(a.rank) ? a.rank : 9999, rb = num(b.rank) ? b.rank : 9999;
+    if (ra !== rb) { return ra - rb; }
+    return (a.price || 0) - (b.price || 0);
+  }
+
+  function fillBucket(list, cardsId, boxId, countId, label) {
+    if (!list.length) { return; }
+    list.forEach(function (p) { $(cardsId).appendChild(duplexCard(p, true)); });
+    $(countId).textContent = list.length + " " + label;
+    $(boxId).hidden = false;
+  }
 
   function render(data) {
     $("asOf").textContent = data.lastUpdated || "unknown";
     if (data.source) { $("srcLine").textContent = "Source: " + data.source; }
 
     var all = data.properties || [];
+    var duplex = all.filter(function (p) { return p.group === "duplex"; });
     var resort = all.filter(function (p) { return p.group === "resort-site"; });
-    var metro = all.filter(function (p) { return p.group === "buffalo-metro"; });
 
-    /* the rank field is hand-curated; order by it, never recompute */
+    /* duplexes: hand-curated rank, never recomputed */
+    duplex.sort(byRank);
+    var groups = { active: [], rented: [], crime: [], pending: [], passed: [] };
+    duplex.forEach(function (p) { groups[bucket(p)].push(p); });
+
+    groups.active.forEach(function (p) { $("duplexCards").appendChild(duplexCard(p, false)); });
+    $("duplexHead").textContent = groups.active.length
+      ? "In contention (" + groups.active.length + ")"
+      : "In contention";
+    $("duplexEmpty").hidden = duplex.length > 0;
+    if (!duplex.length) { $("dmapNote").hidden = true; }
+
+    fillBucket(groups.rented, "rentedCards", "rentedBox", "rentedCount", "listing(s) with both units tenanted");
+    fillBucket(groups.crime, "crimeCards", "crimeBox", "crimeCount", "listing(s) on a high-crime block");
+    fillBucket(groups.pending, "pendingCards", "pendingBox", "pendingCount", "listing(s) off the market");
+    fillBucket(groups.passed, "passedCards", "passedBox", "passedCount", "listing(s) ruled out");
+
+    /* land: unchanged behaviour, now behind a collapsed section */
     resort.sort(function (a, b) { return a.rank - b.rank; });
-
-    var top = resort.slice(0, TOP_N);
-    var rest = resort.slice(TOP_N);
-
+    var top = resort.slice(0, TOP_N), rest = resort.slice(TOP_N);
     $("topHead").textContent = "Top " + top.length + " of " + resort.length;
-    top.forEach(function (p) { $("topCards").appendChild(card(p)); });
-    rest.forEach(function (p) { $("restCards").appendChild(card(p)); });
+    top.forEach(function (p) { $("topCards").appendChild(landCard(p)); });
+    rest.forEach(function (p) { $("restCards").appendChild(landCard(p)); });
     $("restCount").textContent = rest.length + " more resort-site parcels, ranks "
       + (rest.length ? rest[0].rank + " to " + rest[rest.length - 1].rank : "");
-
-    metro.sort(function (a, b) { return a.price - b.price; });
-    metro.forEach(function (p) { $("metroList").appendChild(metroRow(p)); });
-    $("metroCount").textContent = metro.length + " listings, separate search - not ranked";
-
     if (!rest.length) { $("restBox").hidden = true; }
-    if (!metro.length) { $("metroBox").hidden = true; }
+    $("landCount").textContent = resort.length
+      ? resort.length + " parcels, paused - tooling kept live"
+      : "no parcels in the current dataset";
 
     $("status").hidden = true;
     $("main").hidden = false;
 
-    drawMap(resort);
+    drawDuplexMap(duplex);
+    if (resort.length) {
+      drawLandMap(resort);
+      fixMapOnReveal($("landBox"), "map");
+    } else {
+      mapFailed("map", "mapNote");
+    }
+
+    if (location.hash === "#land") { $("landBox").open = true; }
   }
 
   function fail(msg) {
@@ -848,11 +1135,23 @@
     s.hidden = false;
   }
 
+  function isEnriched(data) {
+    var ps = (data && data.properties) || [];
+    var i;
+    for (i = 0; i < ps.length; i++) {
+      if (ps[i].group === "duplex") { return true; }
+      if (ps[i].group === "resort-site") {
+        return typeof ps[i].rank === "number" && typeof ps[i].overallScore === "number";
+      }
+    }
+    return false;
+  }
+
   function tryLoad(i, sawAny) {
     if (i >= SOURCES.length) {
       fail(sawAny
         ? "Found a properties file, but it does not carry the scored fields this page needs "
-          + "(rank, overallScore, revenue). Publish the enriched dataset to data/properties.json."
+          + "(rank, overallScore). Publish the generated dataset to properties.json."
         : "Could not load properties.json. Reload, or check that the file is published.");
       return;
     }
@@ -874,7 +1173,12 @@
     return;
   }
 
-  tryLoad(0, false);
+  /* the zip baseline is a nice-to-have: never let it block the listings */
+  fetch(CRIME_SOURCE, { cache: "no-cache" })
+    .then(function (res) { return res.ok ? res.json() : null; })
+    .then(function (d) { if (d && d.scores) { crimeZips = d.scores; } })
+    .catch(function () { /* no zip baseline available */ })
+    .then(function () { tryLoad(0, false); });
 })();
 </script>
 </body>
